@@ -5,14 +5,14 @@
   <title>Solfege Tower</title>
   <style>
     html, body {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: #faf8f0;
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -20,7 +20,13 @@
       gap: 0.5vmin;
       width: 90vmin;
       height: 90vmin;
-      position: relative;
+      max-width: 100vw;
+      max-height: 100vh;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: transparent;
     }
     .cell, .note-button {
       border-radius: 1vmin;
@@ -33,6 +39,7 @@
       user-select: none;
       transition: transform 0.1s ease, background-color 0.3s ease;
       font-size: clamp(2rem, 6vmin, 4rem);
+      outline: none;
     }
     .active {
       transform: scale(1.1);
@@ -41,13 +48,24 @@
       cursor: pointer;
       padding: 0.5vmin;
       user-select: none;
+      font-size: inherit;
+    }
+    .control-area {
+      outline: none;
+      border-radius: 0.8vmin;
+      box-shadow: none;
+      transition: box-shadow 0.2s;
+    }
+    .control-area.selected {
+      box-shadow: 0 0 0 0.6vmin #444a, 0 1px 8px #0002;
+      background: #ffff;
     }
   </style>
 </head>
 <body>
   <div class="grid" id="grid"></div>
-
   <script>
+    // ---- AUDIO & STATE ----
     const context = new (window.AudioContext || window.webkitAudioContext)();
     const waveforms = ['sine', 'triangle', 'square', 'sawtooth'];
     let currentWaveformIndex = 1;
@@ -58,63 +76,37 @@
     let currentKeyIndex = 0;
 
     const baseFrequencies = {
-  'C4': 261.63,
-  'D4': 293.66,
-  'E4': 329.63,
-  'F4': 349.23,
-  'G4': 392.00,
-  'A4': 440.00,
-  'B4': 493.88,
-  'C5': 523.25,
-  'D5': 587.33,
-  'E5': 659.25,
-  'G3': 196.00,
-  'A3': 220.00,
-  'B3': 246.94
-};
-let noteFrequencies = { ...baseFrequencies };
+      'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+      'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94
+    };
+    let noteFrequencies = { ...baseFrequencies };
 
-const semitoneShiftMap = {
-  'C': 0,
-  'Db': 1,
-  'D': 2,
-  'Eb': 3,
-  'E': 4,
-  'F': 5,
-  'Gb': 6,
-  'G': -5,
-  'Ab': -4,
-  'A': -3,
-  'Bb': -2,
-  'B': -1
-};
-
-function transposeFrequency(freq, semitoneShift) {
-  return freq * Math.pow(2, semitoneShift / 12);
-}
-
-function updateTransposedFrequencies() {
-  const shift = semitoneShiftMap[keyNames[currentKeyIndex]];
-  noteFrequencies = {};
-  for (const [note, freq] of Object.entries(baseFrequencies)) {
-    noteFrequencies[note] = transposeFrequency(freq, shift);
-  }
-}
+    const semitoneShiftMap = {'C':0,'Db':1,'D':2,'Eb':3,'E':4,'F':5,'Gb':6,'G':-5,'Ab':-4,'A':-3,'Bb':-2,'B':-1};
+    function transposeFrequency(freq, semitoneShift) {
+      return freq * Math.pow(2, semitoneShift / 12);
+    }
+    function updateTransposedFrequencies() {
+      const shift = semitoneShiftMap[keyNames[currentKeyIndex]];
+      noteFrequencies = {};
+      for (const [note, freq] of Object.entries(baseFrequencies)) {
+        noteFrequencies[note] = transposeFrequency(freq, shift);
+      }
+    }
 
     const noteColorsByKey = {
-  'C': { 'Do': '#FF3B30', 'Re': '#FF9500', 'Mi': '#FFCC00', 'Fa': '#34C759', 'So': '#5af5fa', 'La': '#007AFF', 'Ti': '#AF52DE' },
-  'Db': { 'Do': '#FF9500', 'Re': '#FFCC00', 'Mi': '#34C759', 'Fa': '#5af5fa', 'So': '#007AFF', 'La': '#AF52DE', 'Ti': '#FF3B30' },
-  'D': { 'Do': '#FF9500', 'Re': '#FFCC00', 'Mi': '#34C759', 'Fa': '#5af5fa', 'So': '#007AFF', 'La': '#AF52DE', 'Ti': '#FF3B30' },
-  'Eb': { 'Do': '#FFCC00', 'Re': '#34C759', 'Mi': '#5af5fa', 'Fa': '#007AFF', 'So': '#AF52DE', 'La': '#FF3B30', 'Ti': '#FF9500' },
-  'E': { 'Do': '#FFCC00', 'Re': '#34C759', 'Mi': '#5af5fa', 'Fa': '#007AFF', 'So': '#AF52DE', 'La': '#FF3B30', 'Ti': '#FF9500' },
-  'F': { 'Do': '#34C759', 'Re': '#5af5fa', 'Mi': '#007AFF', 'Fa': '#AF52DE', 'So': '#FF3B30', 'La': '#FF9500', 'Ti': '#FFCC00' },
-  'Gb': { 'Do': '#5af5fa', 'Re': '#007AFF', 'Mi': '#AF52DE', 'Fa': '#FF3B30', 'So': '#FF9500', 'La': '#FFCC00', 'Ti': '#34C759' },
-  'G': { 'Do': '#5af5fa', 'Re': '#007AFF', 'Mi': '#AF52DE', 'Fa': '#FF3B30', 'So': '#FF9500', 'La': '#FFCC00', 'Ti': '#34C759' },
-  'Ab': { 'Do': '#007AFF', 'Re': '#AF52DE', 'Mi': '#FF3B30', 'Fa': '#FF9500', 'So': '#FFCC00', 'La': '#34C759', 'Ti': '#5af5fa' },
-  'A': { 'Do': '#007AFF', 'Re': '#AF52DE', 'Mi': '#FF3B30', 'Fa': '#FF9500', 'So': '#FFCC00', 'La': '#34C759', 'Ti': '#5af5fa' },
-  'Bb': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' },
-  'B': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' }
-};
+      'C': { 'Do': '#FF3B30', 'Re': '#FF9500', 'Mi': '#FFCC00', 'Fa': '#34C759', 'So': '#5af5fa', 'La': '#007AFF', 'Ti': '#AF52DE' },
+      'Db': { 'Do': '#FF9500', 'Re': '#FFCC00', 'Mi': '#34C759', 'Fa': '#5af5fa', 'So': '#007AFF', 'La': '#AF52DE', 'Ti': '#FF3B30' },
+      'D': { 'Do': '#FF9500', 'Re': '#FFCC00', 'Mi': '#34C759', 'Fa': '#5af5fa', 'So': '#007AFF', 'La': '#AF52DE', 'Ti': '#FF3B30' },
+      'Eb': { 'Do': '#FFCC00', 'Re': '#34C759', 'Mi': '#5af5fa', 'Fa': '#007AFF', 'So': '#AF52DE', 'La': '#FF3B30', 'Ti': '#FF9500' },
+      'E': { 'Do': '#FFCC00', 'Re': '#34C759', 'Mi': '#5af5fa', 'Fa': '#007AFF', 'So': '#AF52DE', 'La': '#FF3B30', 'Ti': '#FF9500' },
+      'F': { 'Do': '#34C759', 'Re': '#5af5fa', 'Mi': '#007AFF', 'Fa': '#AF52DE', 'So': '#FF3B30', 'La': '#FF9500', 'Ti': '#FFCC00' },
+      'Gb': { 'Do': '#5af5fa', 'Re': '#007AFF', 'Mi': '#AF52DE', 'Fa': '#FF3B30', 'So': '#FF9500', 'La': '#FFCC00', 'Ti': '#34C759' },
+      'G': { 'Do': '#5af5fa', 'Re': '#007AFF', 'Mi': '#AF52DE', 'Fa': '#FF3B30', 'So': '#FF9500', 'La': '#FFCC00', 'Ti': '#34C759' },
+      'Ab': { 'Do': '#007AFF', 'Re': '#AF52DE', 'Mi': '#FF3B30', 'Fa': '#FF9500', 'So': '#FFCC00', 'La': '#34C759', 'Ti': '#5af5fa' },
+      'A': { 'Do': '#007AFF', 'Re': '#AF52DE', 'Mi': '#FF3B30', 'Fa': '#FF9500', 'So': '#FFCC00', 'La': '#34C759', 'Ti': '#5af5fa' },
+      'Bb': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' },
+      'B': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' }
+    };
 
     const activeOscillators = {};
     const heldKeys = new Set();
@@ -136,7 +128,6 @@ function updateTransposedFrequencies() {
       osc.start();
       activeOscillators[key] = { osc, gain };
     }
-
     function stopNote(key) {
       const active = activeOscillators[key];
       if (active) {
@@ -180,34 +171,34 @@ function updateTransposedFrequencies() {
     const grid = document.getElementById('grid');
     const keyToDiv = {};
 
-function updateSolfegeColors() {
-  const currentKey = keyNames[currentKeyIndex];
-  const bgColors = noteColorsByKey[currentKey];
-  const textColorsByKey = {
-    'C':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-    'Db':  { 'Do': '#0c027a', 'Re': '#0c027a', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#0c027a', 'Ti': '#FFFFFF' },
-    'D':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#820101' },
-    'Eb':  { 'Do': '#0c027a', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-    'E':   { 'Do': '#FFFFFF', 'Re': '#820101', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#820101', 'Ti': '#820101' },
-    'F':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-    'Gb':  { 'Do': '#0c027a', 'Re': '#0c027a', 'Mi': '#0c027a', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#0c027a', 'Ti': '#FFFFFF' },
-    'G':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#820101' },
-    'Ab':  { 'Do': '#0c027a', 'Re': '#0c027a', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-    'A':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#820101', 'Ti': '#820101' },
-    'Bb':  { 'Do': '#0c027a', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-    'B':   { 'Do': '#FFFFFF', 'Re': '#820101', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#820101', 'La': '#820101', 'Ti': '#820101' }
-  };
-  const textColors = textColorsByKey[currentKey];
-  buttons.forEach(btn => {
-    const div = keyToDiv[btn.key];
-    if (div) {
-      if (bgColors[btn.name]) div.style.backgroundColor = bgColors[btn.name];
-      if (textColors[btn.name]) div.style.color = textColors[btn.name];
+    function updateSolfegeColors() {
+      const currentKey = keyNames[currentKeyIndex];
+      const bgColors = noteColorsByKey[currentKey];
+      const textColorsByKey = {
+        'C':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
+        'Db':  { 'Do': '#0c027a', 'Re': '#0c027a', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#0c027a', 'Ti': '#FFFFFF' },
+        'D':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#820101' },
+        'Eb':  { 'Do': '#0c027a', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
+        'E':   { 'Do': '#FFFFFF', 'Re': '#820101', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#820101', 'Ti': '#820101' },
+        'F':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
+        'Gb':  { 'Do': '#0c027a', 'Re': '#0c027a', 'Mi': '#0c027a', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#0c027a', 'Ti': '#FFFFFF' },
+        'G':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#820101' },
+        'Ab':  { 'Do': '#0c027a', 'Re': '#0c027a', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
+        'A':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#820101', 'Ti': '#820101' },
+        'Bb':  { 'Do': '#0c027a', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
+        'B':   { 'Do': '#FFFFFF', 'Re': '#820101', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#820101', 'La': '#820101', 'Ti': '#820101' }
+      };
+      const textColors = textColorsByKey[currentKey];
+      buttons.forEach(btn => {
+        const div = keyToDiv[btn.key];
+        if (div) {
+          if (bgColors[btn.name]) div.style.backgroundColor = bgColors[btn.name];
+          if (textColors[btn.name]) div.style.color = textColors[btn.name];
+        }
+      });
     }
-  });
-}
- 
 
+    // ---- GRID CELLS ----
     for (let r = 0; r < 11; r++) {
       for (let c = 0; c < 4; c++) {
         const div = document.createElement('div');
@@ -216,41 +207,53 @@ function updateSolfegeColors() {
       }
     }
 
+    // ---- CONTROLS ----
     const bottomControlWrap = document.createElement('div');
-bottomControlWrap.style.position = 'absolute';
-bottomControlWrap.style.display = 'flex';
-bottomControlWrap.style.flexDirection = 'column';
-bottomControlWrap.style.alignItems = 'center';
-bottomControlWrap.style.justifyContent = 'center';
-bottomControlWrap.style.top = `${9.4 * (100 / 11)}vmin`;
-bottomControlWrap.style.left = '0';
-bottomControlWrap.style.width = '100%';
-bottomControlWrap.style.height = `${1.5 * (100 / 11)}vmin`;
-bottomControlWrap.style.rowGap = '0.3vmin';
+    bottomControlWrap.style.position = 'absolute';
+    bottomControlWrap.style.display = 'flex';
+    bottomControlWrap.style.flexDirection = 'column';
+    bottomControlWrap.style.alignItems = 'center';
+    bottomControlWrap.style.justifyContent = 'center';
+    bottomControlWrap.style.top = `${9.4 * (100 / 11)}vmin`;
+    bottomControlWrap.style.left = '0';
+    bottomControlWrap.style.width = '100%';
+    bottomControlWrap.style.height = `${1.5 * (100 / 11)}vmin`;
+    bottomControlWrap.style.rowGap = '0.3vmin';
 
+    // Key control
     const keyButton = document.createElement('div');
-keyButton.innerHTML = '<div class=\"arrow\" id=\"key-left\">&#9664;</div><div id=\"key-name\">C Major</div><div class=\"arrow\" id=\"key-right\">&#9654;</div>';
+    keyButton.className = 'control-area';
+    keyButton.tabIndex = 0;
+    keyButton.setAttribute('aria-label', 'Key control');
+    keyButton.innerHTML = '<div class="arrow" id="key-left">&#9664;</div><div id="key-name">C Major</div><div class="arrow" id="key-right">&#9654;</div>';
     keyButton.style.position = 'static';
-keyButton.style.display = 'flex';
-keyButton.style.alignItems = 'center';
-keyButton.style.justifyContent = 'center';
-keyButton.style.width = '100%';
-keyButton.style.height = '100%';
-keyButton.style.fontSize = 'clamp(1.6rem, 3.5vmin, 2.4rem)';
-const waveButton = document.createElement('div');
-waveButton.innerHTML = '<div class="arrow" id="left-arrow">&#9664;</div><div id="waveform-name">triangle</div><div class="arrow" id="right-arrow">&#9654;</div>';
-waveButton.style.position = 'static';
-waveButton.style.display = 'flex';
-waveButton.style.alignItems = 'center';
-waveButton.style.justifyContent = 'center';
-waveButton.style.width = '100%';
-waveButton.style.height = '100%';
-waveButton.style.fontSize = 'clamp(1.6rem, 3.5vmin, 2.4rem)';
-bottomControlWrap.appendChild(keyButton);
-bottomControlWrap.appendChild(waveButton);
-grid.appendChild(bottomControlWrap);
+    keyButton.style.display = 'flex';
+    keyButton.style.alignItems = 'center';
+    keyButton.style.justifyContent = 'center';
+    keyButton.style.width = '100%';
+    keyButton.style.height = '100%';
+    keyButton.style.fontSize = 'clamp(1.6rem, 3.5vmin, 2.4rem)';
+    keyButton.style.marginBottom = '0.2vmin';
 
-    // Set up event handlers once buttons are in the DOM
+    // Waveform control
+    const waveButton = document.createElement('div');
+    waveButton.className = 'control-area';
+    waveButton.tabIndex = 0;
+    waveButton.setAttribute('aria-label', 'Waveform control');
+    waveButton.innerHTML = '<div class="arrow" id="left-arrow">&#9664;</div><div id="waveform-name">triangle</div><div class="arrow" id="right-arrow">&#9654;</div>';
+    waveButton.style.position = 'static';
+    waveButton.style.display = 'flex';
+    waveButton.style.alignItems = 'center';
+    waveButton.style.justifyContent = 'center';
+    waveButton.style.width = '100%';
+    waveButton.style.height = '100%';
+    waveButton.style.fontSize = 'clamp(1.6rem, 3.5vmin, 2.4rem)';
+
+    bottomControlWrap.appendChild(keyButton);
+    bottomControlWrap.appendChild(waveButton);
+    grid.appendChild(bottomControlWrap);
+
+    // -- Controls click events --
     document.getElementById("key-left").onclick = () => {
       currentKeyIndex = (currentKeyIndex - 1 + keyNames.length) % keyNames.length;
       document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
@@ -258,11 +261,10 @@ grid.appendChild(bottomControlWrap);
       updateSolfegeColors();
     };
     document.getElementById("key-right").onclick = () => {
-  currentKeyIndex = (currentKeyIndex + 1) % keyNames.length;
-  document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
-  updateTransposedFrequencies();
-  updateSolfegeColors();
-  updateTransposedFrequencies();
+      currentKeyIndex = (currentKeyIndex + 1) % keyNames.length;
+      document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
+      updateTransposedFrequencies();
+      updateSolfegeColors();
     };
     document.getElementById("left-arrow").onclick = () => {
       currentWaveformIndex = (currentWaveformIndex - 1 + waveforms.length) % waveforms.length;
@@ -275,10 +277,30 @@ grid.appendChild(bottomControlWrap);
       document.getElementById("waveform-name").textContent = currentWaveform;
     };
 
+    // Highlight for selected control
+    let controlMode = null;
+    function selectControl(which) {
+      controlMode = which;
+      keyButton.classList.toggle('selected', which === 'key');
+      waveButton.classList.toggle('selected', which === 'waveform');
+      if (which === 'key') keyButton.focus();
+      if (which === 'waveform') waveButton.focus();
+    }
+
+    keyButton.onclick = () => selectControl('key');
+    keyButton.onfocus = () => selectControl('key');
+    waveButton.onclick = () => selectControl('waveform');
+    waveButton.onfocus = () => selectControl('waveform');
+
+    keyButton.onblur = () => keyButton.classList.remove('selected');
+    waveButton.onblur = () => waveButton.classList.remove('selected');
+
+    // --- NOTE BUTTONS ---
     buttons.forEach(btn => {
       const div = document.createElement('div');
       div.className = 'note-button';
       div.textContent = btn.name;
+      div.style.outline = 'none';
       if (btn.name === 'Do' && btn.key === '1') div.style.fontSize = 'clamp(6rem, 12vmin, 8rem)';
       if (btn.name === 'So' && btn.key === '5') div.style.fontSize = 'clamp(4rem, 8vmin, 6rem)';
       const color = noteColorsByKey[keyNames[currentKeyIndex]][btn.name] || '#ccc';
@@ -297,9 +319,12 @@ grid.appendChild(bottomControlWrap);
       div.style.height = `${height}vmin`;
       div.style.width = `${width}vmin`;
 
-      div.addEventListener('mousedown', () => {
+      // Mouse events
+      div.addEventListener('mousedown', (e) => {
+        e.preventDefault();
         startNote(btn.key, noteFrequencies[btn.note]);
         div.classList.add('active');
+        window.focus();
       });
       div.addEventListener('mouseup', () => {
         stopNote(btn.key);
@@ -310,40 +335,60 @@ grid.appendChild(bottomControlWrap);
         div.classList.remove('active');
       });
 
+      // Touch events
+      div.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startNote(btn.key, noteFrequencies[btn.note]);
+        div.classList.add('active');
+        window.focus();
+      });
+      div.addEventListener('touchend', () => {
+        stopNote(btn.key);
+        div.classList.remove('active');
+      });
+      div.addEventListener('touchcancel', () => {
+        stopNote(btn.key);
+        div.classList.remove('active');
+      });
+
       grid.appendChild(div);
       keyToDiv[btn.key] = div;
     });
 
-    document.addEventListener('keydown', (e) => {
-      heldKeys.add(e.key);
-      const btn = buttons.find(b => b.key === e.key);
-      if (btn) {
-        startNote(btn.key, noteFrequencies[btn.note]);
-        if (keyToDiv[btn.key]) keyToDiv[btn.key].classList.add('active');
+    // ---- KEYBOARD EVENTS (top-level) ----
+    window.addEventListener('keydown', (e) => {
+      // If focus is on a control area, use left/right for control
+      if (document.activeElement === keyButton && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        if (e.key === 'ArrowLeft') document.getElementById('key-left').click();
+        else if (e.key === 'ArrowRight') document.getElementById('key-right').click();
+        e.preventDefault();
+        return;
+      }
+      if (document.activeElement === waveButton && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        if (e.key === 'ArrowLeft') document.getElementById('left-arrow').click();
+        else if (e.key === 'ArrowRight') document.getElementById('right-arrow').click();
+        e.preventDefault();
+        return;
+      }
+      // For notes
+      if (!heldKeys.has(e.key)) {
+        heldKeys.add(e.key);
+        const btn = buttons.find(b => b.key === e.key);
+        if (btn) {
+          startNote(btn.key, noteFrequencies[btn.note]);
+          if (keyToDiv[btn.key]) keyToDiv[btn.key].classList.add('active');
+        }
       }
     });
-
-    document.addEventListener('keyup', (e) => {
+    window.addEventListener('keyup', (e) => {
       heldKeys.delete(e.key);
       stopNote(e.key);
       if (keyToDiv[e.key]) keyToDiv[e.key].classList.remove('active');
     });
-  let controlMode = null; // 'waveform' or 'key'
 
-waveButton.onclick = () => controlMode = 'waveform';
-keyButton.onclick = () => controlMode = 'key';
-
-document.addEventListener('keydown', (e) => {
-  if (document.activeElement === document.body) {
-    if (controlMode === 'waveform') {
-      if (e.key === 'ArrowLeft') document.getElementById('left-arrow').click();
-      else if (e.key === 'ArrowRight') document.getElementById('right-arrow').click();
-    } else if (controlMode === 'key') {
-      if (e.key === 'ArrowLeft') document.getElementById('key-left').click();
-      else if (e.key === 'ArrowRight') document.getElementById('key-right').click();
-    }
-  }
-});
-</script>
+    // -- Init --
+    updateTransposedFrequencies();
+    updateSolfegeColors();
+  </script>
 </body>
 </html>

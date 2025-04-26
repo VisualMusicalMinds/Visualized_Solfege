@@ -5,6 +5,7 @@
   <title>Solfege Tower</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
+    /* ... (Same CSS as before, omitted for brevity) ... */
     html, body, #app-wrapper, .main-content {
       height: 100%; min-height: 0; min-width: 0;
       margin: 0; padding: 0; box-sizing: border-box;
@@ -145,9 +146,10 @@
     </div>
   </div>
   <script>
-    // ---- AUDIO & STATE ----
+    // --- AUDIO & STATE ---
     const context = new (window.AudioContext || window.webkitAudioContext)();
-    const waveforms = ['sine', 'triangle', 'square', 'sawtooth'];
+    // Now five options, voice is last!
+    const waveforms = ['sine', 'triangle', 'square', 'sawtooth', 'voice'];
     let currentWaveformIndex = 1;
     let currentWaveform = waveforms[currentWaveformIndex];
     let globalVolume = 0.4;
@@ -188,38 +190,110 @@
       'B': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' }
     };
 
+    // "Voice" waveform setup
+    const harmonics = 20;
+    const real = new Float32Array(harmonics);
+    const imag = new Float32Array(harmonics);
+    real[1] = 1; // fundamental
+    real[2] = 0.15;
+    real[3] = 0.1;
+    real[4] = 0.05;
+    for (let i = 5; i < harmonics; i++) real[i] = 0;
+    const customVoiceWave = context.createPeriodicWave(real, imag);
+
     const activeOscillators = {};
     const heldKeys = new Set();
 
     function startNote(key, freq) {
       if (activeOscillators[key]) return;
-      const osc = context.createOscillator();
-      const gain = context.createGain();
-      const filter = context.createBiquadFilter();
-      osc.type = currentWaveform;
-      osc.frequency.value = freq;
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1200, context.currentTime);
-      filter.Q.value = 1;
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(context.destination);
-      gain.gain.setValueAtTime(globalVolume, context.currentTime);
-      osc.start();
-      activeOscillators[key] = { osc, gain };
+
+      let osc, gain, lfo, lfoGain, filter;
+
+      gain = context.createGain();
+
+      if (currentWaveform === "voice") {
+        // Voice: use custom periodic wave, vibrato, and ADSR
+        osc = context.createOscillator();
+        osc.setPeriodicWave(customVoiceWave);
+        osc.frequency.value = freq;
+
+        // Vibrato: slow at start, increases
+        lfo = context.createOscillator();
+        lfoGain = context.createGain();
+        lfo.frequency.setValueAtTime(1.5, context.currentTime);
+        lfo.frequency.linearRampToValueAtTime(5, context.currentTime + 1);
+        lfoGain.gain.setValueAtTime(2.0, context.currentTime);
+
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+        lfo.start();
+
+        filter = context.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1200, context.currentTime);
+        filter.Q.value = 1;
+
+        osc.connect(filter);
+        filter.connect(gain);
+
+        // ADSR Envelope
+        const now = context.currentTime;
+        const attackTime = 0.08;
+        const decayTime = 0.18;
+        const sustainLevel = globalVolume * 0.5;
+        const maxLevel = globalVolume * 0.85;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(maxLevel, now + attackTime);
+        gain.gain.linearRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
+
+        gain.connect(context.destination);
+        osc.start();
+
+        activeOscillators[key] = { osc, gain, lfo, lfoGain, filter };
+      } else {
+        // Standard synth
+        osc = context.createOscillator();
+        osc.type = currentWaveform;
+        osc.frequency.value = freq;
+
+        filter = context.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1200, context.currentTime);
+        filter.Q.value = 1;
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(context.destination);
+        gain.gain.setValueAtTime(globalVolume, context.currentTime);
+        osc.start();
+
+        activeOscillators[key] = { osc, gain, filter };
+      }
     }
+
     function stopNote(key) {
       const active = activeOscillators[key];
-      if (active) {
-        const now = context.currentTime;
+      if (!active) return;
+
+      const now = context.currentTime;
+      if (currentWaveform === "voice") {
+        // Voice: ADSR release and stop LFO
+        active.gain.gain.cancelScheduledValues(now);
+        active.gain.gain.setValueAtTime(active.gain.gain.value, now);
+        active.gain.gain.setTargetAtTime(0, now, 0.18);
+        active.osc.stop(now + 0.3);
+        if (active.lfo) active.lfo.stop(now + 0.3);
+      } else {
+        // Standard synth: smooth release
         active.gain.gain.cancelScheduledValues(now);
         active.gain.gain.setValueAtTime(active.gain.gain.value, now);
         active.gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
         active.osc.stop(now + 1.3);
-        delete activeOscillators[key];
       }
+      delete activeOscillators[key];
     }
 
+    // --- Grid and Controls setup (same as your working code!) ---
     const positions = {
       '10a': [9, 0], '10b': [9, 1], '10c': [9, 2], '10d': [9, 3],
       '3a': [2, 0], '4a': [3, 0], '3b': [2, 1], '4b': [3, 1], '3c': [2, 2], '4c': [3, 2],
@@ -247,7 +321,6 @@
       { name: 'Re', key: '9', note: 'D5', cells: ['1c'] },
       { name: 'Mi', key: '0', note: 'E5', cells: ['1d'] }
     ];
-
     const grid = document.getElementById('grid');
     const keyToDiv = {};
 
@@ -459,7 +532,7 @@
       if (keyToDiv[e.key]) keyToDiv[e.key].classList.remove('active');
     });
 
-    // --- Responsive grid: maximize size, keep 4:11 ratio, fill available space below controls, always centered ---
+    // --- Responsive grid ---
     function resizeGrid() {
       const gridEl = document.getElementById('grid');
       const gridWrapper = document.querySelector('.proportional-grid-wrapper');

@@ -204,19 +204,18 @@
     const heldKeys = new Set();
 
     function startNote(key, freq) {
-      if (activeOscillators[key]) return;
+      // Fix for stuck notes: always stop previous sound for this key
+      stopNote(key);
 
       let osc, gain, lfo, lfoGain, filter;
 
       gain = context.createGain();
 
       if (currentWaveform === "voice") {
-        // Voice: use custom periodic wave, vibrato, and ADSR
         osc = context.createOscillator();
         osc.setPeriodicWave(customVoiceWave);
         osc.frequency.value = freq;
 
-        // Vibrato: slow at start, increases
         lfo = context.createOscillator();
         lfoGain = context.createGain();
         lfo.frequency.setValueAtTime(1.5, context.currentTime);
@@ -250,7 +249,6 @@
 
         activeOscillators[key] = { osc, gain, lfo, lfoGain, filter };
       } else {
-        // Standard synth
         osc = context.createOscillator();
         osc.type = currentWaveform;
         osc.frequency.value = freq;
@@ -276,16 +274,14 @@
 
       const now = context.currentTime;
       if (currentWaveform === "voice") {
-        // Voice: ADSR release and stop LFO (faster drop, longer tail)
         active.gain.gain.cancelScheduledValues(now);
         active.gain.gain.setValueAtTime(active.gain.gain.value, now);
-        const releaseTime = 0.1; // seconds for the ramp
-        const stopBuffer = 0.05; // slight buffer so the osc stops after gain is fully down
+        const releaseTime = 0.6; // Smoother tail
+        const stopBuffer = 0.1;
         active.gain.gain.linearRampToValueAtTime(0.0001, now + releaseTime);
         active.osc.stop(now + releaseTime + stopBuffer);
         if (active.lfo) active.lfo.stop(now + releaseTime + stopBuffer);
       } else {
-        // Standard synth: smooth release
         active.gain.gain.cancelScheduledValues(now);
         active.gain.gain.setValueAtTime(active.gain.gain.value, now);
         const releaseTime = 1.2;

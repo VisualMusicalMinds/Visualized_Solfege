@@ -5,21 +5,39 @@
   <title>Solfege Tower</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%; width: 100%; box-sizing: border-box; background: #faf8f0; overflow: hidden;
+    html, body, #app-wrapper, .main-content {
+      height: 100%; min-height: 0; min-width: 0;
+      margin: 0; padding: 0; box-sizing: border-box;
     }
-    body, #app-wrapper {
-      height: 100vh; width: 100vw;
-      display: flex; flex-direction: column;
-      justify-content: stretch; align-items: stretch; overflow: hidden;
+    #app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+    .controls-bar {
+      width: 100vw;
+      box-sizing: border-box;
+      padding: 0.5vmin 0.5vmin 0 0.5vmin;
+      background: #faf8f0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: stretch;
+      gap: 1.5vw;
+      border-bottom: 1px solid #eee;
+      z-index: 10;
+      flex-shrink: 0;
+      flex-grow: 0;
+      flex-basis: auto;
+      transition: flex-direction 0.2s;
     }
     .main-content {
-      flex: 1 1 auto; display: flex; flex-direction: column; align-items: stretch; justify-content: stretch;
-      min-height: 0; min-width: 0; overflow: hidden; position: relative;
+      flex: 1 1 0;
+      display: flex; flex-direction: column;
+      min-height: 0; min-width: 0; height: 100%;
+      overflow: hidden; position: relative;
     }
     .proportional-grid-wrapper {
-      flex: 1 1 auto; min-height: 0; min-width: 0; display: flex; align-items: center; justify-content: center;
-      position: relative; overflow-x: auto; overflow-y: hidden; width: 100vw; height: 100%;
+      flex: 1 1 0;
+      min-height: 0; min-width: 0;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; width: 100vw; overflow: hidden;
     }
     .grid {
       display: grid;
@@ -36,47 +54,22 @@
     .cell, .note-button {
       border-radius: 1vmin;
       position: absolute;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
       font-weight: bold;
       color: white;
       user-select: none;
       transition: transform 0.1s, background-color 0.3s, font-size 0.2s;
       outline: none;
       min-width: 0; min-height: 0;
-      will-change: font-size;
     }
     .active { transform: scale(1.08); }
-    .controls-bar {
-      width: 100vw;
-      min-height: 0;
-      box-sizing: border-box;
-      padding: 0.5vmin 0.5vmin 0 0.5vmin;
-      background: #faf8f0;
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: stretch;
-      gap: 1.5vw;
-      border-top: 1px solid #eee;
-      z-index: 10;
-      flex: 0 0 auto;
-      transition: flex-direction 0.2s;
-    }
     .control-area {
       outline: none;
       border-radius: 0.8vmin;
-      box-shadow: none;
-      transition: box-shadow 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: min(2.8vw, 2.8vh, 2em);
       padding: 0.3em 1em;
       background: #fff;
-      min-width: 0;
-      min-height: 0;
       white-space: nowrap;
       margin: 0;
     }
@@ -91,10 +84,7 @@
       font-size: inherit;
     }
     .volume-control {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 0;
+      display: flex; align-items: center; justify-content: center;
       gap: 0.5vw;
       font-size: min(2.2vw, 2.2vh, 1.2em);
       user-select: none;
@@ -132,28 +122,27 @@
         width: 100%;
         margin: 0;
         border-radius: 0;
-        border-top: 1px solid #eee;
-        border-bottom: none;
-        box-shadow: none;
+        border-top: none;
+        border-bottom: 1px solid #eee;
         background: #fff;
         justify-content: center;
         min-height: 0;
         min-width: 0;
       }
-      .controls-bar > *:first-child {
-        border-top: none !important;
+      .controls-bar > *:last-child {
+        border-bottom: none !important;
       }
     }
   </style>
 </head>
 <body>
   <div id="app-wrapper">
+    <div class="controls-bar" id="controls-bar"></div>
     <div class="main-content">
       <div class="proportional-grid-wrapper">
         <div class="grid" id="grid"></div>
       </div>
     </div>
-    <div class="controls-bar" id="controls-bar"></div>
   </div>
   <script>
     // ---- AUDIO & STATE ----
@@ -298,7 +287,7 @@
       }
     }
 
-    // ---- CONTROLS (bottom bar) ----
+    // ---- CONTROLS (top bar) ----
     const controlsBar = document.getElementById('controls-bar');
     const keyButton = document.createElement('div');
     keyButton.className = 'control-area';
@@ -470,13 +459,13 @@
       if (keyToDiv[e.key]) keyToDiv[e.key].classList.remove('active');
     });
 
-    // --- Responsive grid: maximize size, keep 4:11 ratio, fill available space, always centered ---
+    // --- Responsive grid: maximize size, keep 4:11 ratio, fill available space below controls, always centered ---
     function resizeGrid() {
-      const controls = document.getElementById('controls-bar');
       const gridEl = document.getElementById('grid');
-      const controlsHeight = controls.getBoundingClientRect().height;
-      const availableWidth = window.innerWidth;
-      const availableHeight = window.innerHeight - controlsHeight;
+      const gridWrapper = document.querySelector('.proportional-grid-wrapper');
+      const gwRect = gridWrapper.getBoundingClientRect();
+      const availableWidth = gwRect.width;
+      const availableHeight = gwRect.height;
 
       // Aspect ratio
       const aspectW = 4;
@@ -508,7 +497,7 @@
       });
     }
     window.addEventListener('resize', resizeGrid);
-    window.addEventListener('DOMContentLoaded', resizeGrid);
+    window.addEventListener('DOMContentLoaded', () => setTimeout(resizeGrid, 1));
     setTimeout(resizeGrid, 200);
     const mq = window.matchMedia("(max-width: 550px)");
     mq.addEventListener("change", resizeGrid);

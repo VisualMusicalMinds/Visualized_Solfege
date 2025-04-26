@@ -5,7 +5,6 @@
   <title>Solfege Tower</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* ... (Same CSS as before, omitted for brevity) ... */
     html, body, #app-wrapper, .main-content {
       height: 100%; min-height: 0; min-width: 0;
       margin: 0; padding: 0; box-sizing: border-box;
@@ -277,12 +276,12 @@
 
       const now = context.currentTime;
       if (currentWaveform === "voice") {
-        // Voice: ADSR release and stop LFO
+        // Voice: ADSR release and stop LFO (faster drop, longer tail)
         active.gain.gain.cancelScheduledValues(now);
         active.gain.gain.setValueAtTime(active.gain.gain.value, now);
-        active.gain.gain.setTargetAtTime(0, now, 0.18);
-        active.osc.stop(now + 0.3);
-        if (active.lfo) active.lfo.stop(now + 0.3);
+        active.gain.gain.setTargetAtTime(0, now, 0.15); // stronger decrescendo at start, smooth tail
+        active.osc.stop(now + 0.8);
+        if (active.lfo) active.lfo.stop(now + 0.8);
       } else {
         // Standard synth: smooth release
         active.gain.gain.cancelScheduledValues(now);
@@ -293,7 +292,7 @@
       delete activeOscillators[key];
     }
 
-    // --- Grid and Controls setup (same as your working code!) ---
+    // --- Grid and Controls setup (same as before!) ---
     const positions = {
       '10a': [9, 0], '10b': [9, 1], '10c': [9, 2], '10d': [9, 3],
       '3a': [2, 0], '4a': [3, 0], '3b': [2, 1], '4b': [3, 1], '3c': [2, 2], '4c': [3, 2],

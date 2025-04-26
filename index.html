@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Solfege Tower</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     html, body {
-      margin: 0; padding: 0; height: 100%; width: 100%; box-sizing: border-box; overflow: hidden; background: #faf8f0;
+      margin: 0; padding: 0; height: 100%; width: 100%; box-sizing: border-box; background: #faf8f0; overflow: hidden;
     }
     body, #app-wrapper {
       height: 100vh; width: 100vw;
@@ -17,15 +18,14 @@
       min-height: 0; min-width: 0; overflow: hidden; position: relative;
     }
     .proportional-grid-wrapper {
-      flex: 1 1 auto; min-height: 0; min-width: 0; display: flex; align-items: stretch; justify-content: center;
-      position: relative; overflow: hidden; width: 100%; height: 100%;
+      flex: 1 1 auto; min-height: 0; min-width: 0; display: flex; align-items: center; justify-content: center;
+      position: relative; overflow-x: auto; overflow-y: hidden; width: 100vw; height: 100%;
     }
     .grid {
-      /* Will be sized by JS! */
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(11, 1fr);
-      gap: 0.575%; /* 15% larger than 0.5% */
+      gap: 0.5%;
       position: relative;
       background: transparent;
       margin: 0 auto;
@@ -34,7 +34,7 @@
       transition: width 0.2s, height 0.2s;
     }
     .cell, .note-button {
-      border-radius: 1.15vmin; /* 15% larger than 1vmin */
+      border-radius: 1vmin;
       position: absolute;
       display: flex;
       justify-content: center;
@@ -44,7 +44,6 @@
       user-select: none;
       transition: transform 0.1s, background-color 0.3s, font-size 0.2s;
       outline: none;
-      font-size: 3.22vw; /* 15% larger than 2.8vw */
       min-width: 0; min-height: 0;
       will-change: font-size;
     }
@@ -53,13 +52,13 @@
       width: 100vw;
       min-height: 0;
       box-sizing: border-box;
-      padding: 0.575vmin 0.575vmin 0 0.575vmin; /* 15% larger than 0.5vmin */
+      padding: 0.5vmin 0.5vmin 0 0.5vmin;
       background: #faf8f0;
       display: flex;
       flex-direction: row;
       justify-content: center;
       align-items: stretch;
-      gap: 1.725vw; /* 15% larger than 1.5vw */
+      gap: 1.5vw;
       border-top: 1px solid #eee;
       z-index: 10;
       flex: 0 0 auto;
@@ -67,14 +66,14 @@
     }
     .control-area {
       outline: none;
-      border-radius: 0.92vmin; /* 15% larger than 0.8vmin */
+      border-radius: 0.8vmin;
       box-shadow: none;
       transition: box-shadow 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: min(3.22vw, 3.22vh, 2.3em); /* 15% larger than 2.8vw/2.8vh/2em */
-      padding: 0.345em 1.15em; /* 15% larger than 0.3em 1em */
+      font-size: min(2.8vw, 2.8vh, 2em);
+      padding: 0.3em 1em;
       background: #fff;
       min-width: 0;
       min-height: 0;
@@ -82,12 +81,12 @@
       margin: 0;
     }
     .control-area.selected {
-      box-shadow: 0 0 0 0.69vmin #444a, 0 1px 8px #0002; /* 15% larger than 0.6vmin */
+      box-shadow: 0 0 0 0.6vmin #444a, 0 1px 8px #0002;
       background: #ffff;
     }
     .arrow {
       cursor: pointer;
-      padding: 0.23em 0.575em; /* 15% larger than 0.2em 0.5em */
+      padding: 0.2em 0.5em;
       user-select: none;
       font-size: inherit;
     }
@@ -96,30 +95,30 @@
       align-items: center;
       justify-content: center;
       min-width: 0;
-      gap: 0.575vw; /* 15% larger than 0.5vw */
-      font-size: min(2.53vw, 2.53vh, 1.38em); /* 15% larger than 2.2vw/2.2vh/1.2em */
+      gap: 0.5vw;
+      font-size: min(2.2vw, 2.2vh, 1.2em);
       user-select: none;
-      padding: 0.115em 0.69em; /* 15% larger than 0.1em 0.6em */
+      padding: 0.1em 0.6em;
       background: #fff;
-      border-radius: 0.92vmin; /* 15% larger than 0.8vmin */
+      border-radius: 0.8vmin;
       margin: 0;
     }
     .volume-slider {
-      width: min(18.4vw, 161px); /* 15% larger than 16vw/140px */
+      width: min(16vw, 140px);
       accent-color: #007AFF;
       cursor: pointer;
-      min-width: 69px; /* 15% larger than 60px */
-      max-width: 207px; /* 15% larger than 180px */
+      min-width: 60px;
+      max-width: 180px;
     }
-    .volume-label { font-weight: bold; margin-right: 0.345em; }
+    .volume-label { font-weight: bold; margin-right: 0.3em; }
     .volume-value {
-      width: 3.68em; /* 15% larger than 3.2em */
+      width: 3.2em;
       text-align: left;
       color: #444;
       font-variant-numeric: tabular-nums;
-      font-size: 1.15em; /* 15% larger than 1em */
-      margin-left: 0.345em;
-      letter-spacing: 0.046em;
+      font-size: 1em;
+      margin-left: 0.3em;
+      letter-spacing: 0.04em;
     }
     @media (max-width: 550px) {
       .controls-bar {
@@ -322,7 +321,7 @@
     volumeControl.setAttribute('aria-label', 'Volume control');
     volumeControl.style.outline = 'none';
     volumeControl.addEventListener('focus', () => {
-      volumeControl.style.boxShadow = '0 0 0 0.575vmin #007aff88';
+      volumeControl.style.boxShadow = '0 0 0 0.5vmin #007aff88';
     });
     volumeControl.addEventListener('blur', () => {
       volumeControl.style.boxShadow = 'none';
@@ -378,7 +377,7 @@
       controlMode = which;
       keyButton.classList.toggle('selected', which === 'key');
       waveButton.classList.toggle('selected', which === 'waveform');
-      volumeControl.style.boxShadow = which === 'volume' ? '0 0 0 0.575vmin #007aff88' : 'none';
+      volumeControl.style.boxShadow = which === 'volume' ? '0 0 0 0.5vmin #007aff88' : 'none';
       if (which === 'key') keyButton.focus();
       if (which === 'waveform') waveButton.focus();
       if (which === 'volume') volumeControl.focus();
@@ -396,8 +395,6 @@
       div.className = 'note-button';
       div.textContent = btn.name;
       div.style.outline = 'none';
-      if (btn.name === 'Do' && btn.key === '1') div.style.fontSize = 'min(9.2vw, 9.2vh, 8.05em)'; // 15% larger
-      if (btn.name === 'So' && btn.key === '5') div.style.fontSize = 'min(6.9vw, 6.9vh, 5.18em)'; // 15% larger
       const color = noteColorsByKey[keyNames[currentKeyIndex]][btn.name] || '#ccc';
       div.style.backgroundColor = color;
       const rows = [...new Set(btn.cells.map(c => positions[c][0]))];
@@ -473,26 +470,36 @@
       if (keyToDiv[e.key]) keyToDiv[e.key].classList.remove('active');
     });
 
-    // --- Grid should NEVER get wider than maxWidth; always fill all vertical space above controls; centered horizontally ---
+    // --- Responsive grid: maximize size, keep 4:11 ratio, fill available space, always centered ---
     function resizeGrid() {
       const controls = document.getElementById('controls-bar');
-      const propGridWrapper = document.querySelector('.proportional-grid-wrapper');
       const gridEl = document.getElementById('grid');
       const controlsHeight = controls.getBoundingClientRect().height;
+      const availableWidth = window.innerWidth;
       const availableHeight = window.innerHeight - controlsHeight;
 
-      // grid width: fixed maximum, or availableHeight * (4/11) (4 columns, 11 rows)
-      const gridRatio = 4/11;
-      let maxWidth = Math.min(window.innerWidth, Math.round(availableHeight * gridRatio * 1.15), 805); // 15% larger than 700px
-      gridEl.style.width = maxWidth + 'px';
-      gridEl.style.height = availableHeight * 1.15 + 'px'; // 15% larger
+      // Aspect ratio
+      const aspectW = 4;
+      const aspectH = 11;
+
+      // Calculate max grid size that fits
+      let gridWidth = availableHeight * (aspectW/aspectH);
+      let gridHeight = availableHeight;
+
+      if (gridWidth > availableWidth) {
+        gridWidth = availableWidth;
+        gridHeight = availableWidth * (aspectH/aspectW);
+      }
+
+      gridEl.style.width = gridWidth + 'px';
+      gridEl.style.height = gridHeight + 'px';
       gridEl.style.marginLeft = "auto";
       gridEl.style.marginRight = "auto";
       gridEl.style.marginTop = "0";
       gridEl.style.marginBottom = "0";
 
-      // Scale font-size for all note-buttons and cells for readability
-      const fontSize = Math.min((availableHeight * 1.15)/11, maxWidth/4) * 0.5;
+      // Set font size based on cell size
+      const fontSize = Math.min(gridHeight / 11, gridWidth / 4) * 0.5;
       gridEl.querySelectorAll('.note-button').forEach(div=>{
         div.style.fontSize = fontSize + 'px';
       });

@@ -279,7 +279,7 @@
         // Voice: ADSR release and stop LFO (faster drop, longer tail)
         active.gain.gain.cancelScheduledValues(now);
         active.gain.gain.setValueAtTime(active.gain.gain.value, now);
-        active.gain.gain.setTargetAtTime(0, now, 0.15); // stronger decrescendo at start, smooth tail
+        active.gain.gain.setTargetAtTime(0.0001, now + 0.1); // stronger decrescendo at start, smooth tail
         active.osc.stop(now + 0.8);
         if (active.lfo) active.lfo.stop(now + 0.8);
       } else {

@@ -5,31 +5,36 @@
   <title>Solfege Tower</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      box-sizing: border-box;
-      background: #faf8f0;
+      margin: 0; padding: 0; height: 100%; width: 100%; box-sizing: border-box; overflow: hidden; background: #faf8f0;
+    }
+    body, #app-wrapper {
+      height: 100vh; width: 100vw;
+      display: flex; flex-direction: column;
+      justify-content: stretch; align-items: stretch; overflow: hidden;
+    }
+    .main-content {
+      flex: 1 1 auto; display: flex; flex-direction: column; align-items: stretch; justify-content: stretch;
+      min-height: 0; min-width: 0; overflow: hidden; position: relative;
+    }
+    .proportional-grid-wrapper {
+      flex: 1 1 auto; min-height: 0; min-width: 0; display: flex; align-items: stretch; justify-content: center;
+      position: relative; overflow: hidden; width: 100%; height: 100%;
     }
     .grid {
+      /* Will be sized by JS! */
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(11, 1fr);
-      gap: 0.5vmin;
-      width: 90vmin;
-      height: 90vmin;
-      max-width: 100vw;
-      max-height: 100vh;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      gap: 0.575%; /* 15% larger than 0.5% */
+      position: relative;
       background: transparent;
+      margin: 0 auto;
+      box-sizing: border-box;
+      min-width: 0; min-height: 0;
+      transition: width 0.2s, height 0.2s;
     }
     .cell, .note-button {
-      border-radius: 1vmin;
+      border-radius: 1.15vmin; /* 15% larger than 1vmin */
       position: absolute;
       display: flex;
       justify-content: center;
@@ -37,33 +42,120 @@
       font-weight: bold;
       color: white;
       user-select: none;
-      transition: transform 0.1s ease, background-color 0.3s ease;
-      font-size: clamp(2rem, 6vmin, 4rem);
+      transition: transform 0.1s, background-color 0.3s, font-size 0.2s;
       outline: none;
+      font-size: 3.22vw; /* 15% larger than 2.8vw */
+      min-width: 0; min-height: 0;
+      will-change: font-size;
     }
-    .active {
-      transform: scale(1.1);
-    }
-    .arrow {
-      cursor: pointer;
-      padding: 0.5vmin;
-      user-select: none;
-      font-size: inherit;
+    .active { transform: scale(1.08); }
+    .controls-bar {
+      width: 100vw;
+      min-height: 0;
+      box-sizing: border-box;
+      padding: 0.575vmin 0.575vmin 0 0.575vmin; /* 15% larger than 0.5vmin */
+      background: #faf8f0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: stretch;
+      gap: 1.725vw; /* 15% larger than 1.5vw */
+      border-top: 1px solid #eee;
+      z-index: 10;
+      flex: 0 0 auto;
+      transition: flex-direction 0.2s;
     }
     .control-area {
       outline: none;
-      border-radius: 0.8vmin;
+      border-radius: 0.92vmin; /* 15% larger than 0.8vmin */
       box-shadow: none;
       transition: box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: min(3.22vw, 3.22vh, 2.3em); /* 15% larger than 2.8vw/2.8vh/2em */
+      padding: 0.345em 1.15em; /* 15% larger than 0.3em 1em */
+      background: #fff;
+      min-width: 0;
+      min-height: 0;
+      white-space: nowrap;
+      margin: 0;
     }
     .control-area.selected {
-      box-shadow: 0 0 0 0.6vmin #444a, 0 1px 8px #0002;
+      box-shadow: 0 0 0 0.69vmin #444a, 0 1px 8px #0002; /* 15% larger than 0.6vmin */
       background: #ffff;
+    }
+    .arrow {
+      cursor: pointer;
+      padding: 0.23em 0.575em; /* 15% larger than 0.2em 0.5em */
+      user-select: none;
+      font-size: inherit;
+    }
+    .volume-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      gap: 0.575vw; /* 15% larger than 0.5vw */
+      font-size: min(2.53vw, 2.53vh, 1.38em); /* 15% larger than 2.2vw/2.2vh/1.2em */
+      user-select: none;
+      padding: 0.115em 0.69em; /* 15% larger than 0.1em 0.6em */
+      background: #fff;
+      border-radius: 0.92vmin; /* 15% larger than 0.8vmin */
+      margin: 0;
+    }
+    .volume-slider {
+      width: min(18.4vw, 161px); /* 15% larger than 16vw/140px */
+      accent-color: #007AFF;
+      cursor: pointer;
+      min-width: 69px; /* 15% larger than 60px */
+      max-width: 207px; /* 15% larger than 180px */
+    }
+    .volume-label { font-weight: bold; margin-right: 0.345em; }
+    .volume-value {
+      width: 3.68em; /* 15% larger than 3.2em */
+      text-align: left;
+      color: #444;
+      font-variant-numeric: tabular-nums;
+      font-size: 1.15em; /* 15% larger than 1em */
+      margin-left: 0.345em;
+      letter-spacing: 0.046em;
+    }
+    @media (max-width: 550px) {
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding-bottom: 0;
+        padding-top: 0;
+      }
+      .control-area, .volume-control {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        border-top: 1px solid #eee;
+        border-bottom: none;
+        box-shadow: none;
+        background: #fff;
+        justify-content: center;
+        min-height: 0;
+        min-width: 0;
+      }
+      .controls-bar > *:first-child {
+        border-top: none !important;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="grid" id="grid"></div>
+  <div id="app-wrapper">
+    <div class="main-content">
+      <div class="proportional-grid-wrapper">
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+    <div class="controls-bar" id="controls-bar"></div>
+  </div>
   <script>
     // ---- AUDIO & STATE ----
     const context = new (window.AudioContext || window.webkitAudioContext)();
@@ -207,53 +299,50 @@
       }
     }
 
-    // ---- CONTROLS ----
-    const bottomControlWrap = document.createElement('div');
-    bottomControlWrap.style.position = 'absolute';
-    bottomControlWrap.style.display = 'flex';
-    bottomControlWrap.style.flexDirection = 'column';
-    bottomControlWrap.style.alignItems = 'center';
-    bottomControlWrap.style.justifyContent = 'center';
-    bottomControlWrap.style.top = `${9.4 * (100 / 11)}vmin`;
-    bottomControlWrap.style.left = '0';
-    bottomControlWrap.style.width = '100%';
-    bottomControlWrap.style.height = `${1.5 * (100 / 11)}vmin`;
-    bottomControlWrap.style.rowGap = '0.3vmin';
-
-    // Key control
+    // ---- CONTROLS (bottom bar) ----
+    const controlsBar = document.getElementById('controls-bar');
     const keyButton = document.createElement('div');
     keyButton.className = 'control-area';
     keyButton.tabIndex = 0;
     keyButton.setAttribute('aria-label', 'Key control');
     keyButton.innerHTML = '<div class="arrow" id="key-left">&#9664;</div><div id="key-name">C Major</div><div class="arrow" id="key-right">&#9654;</div>';
-    keyButton.style.position = 'static';
-    keyButton.style.display = 'flex';
-    keyButton.style.alignItems = 'center';
-    keyButton.style.justifyContent = 'center';
-    keyButton.style.width = '100%';
-    keyButton.style.height = '100%';
-    keyButton.style.fontSize = 'clamp(1.6rem, 3.5vmin, 2.4rem)';
-    keyButton.style.marginBottom = '0.2vmin';
-
-    // Waveform control
     const waveButton = document.createElement('div');
     waveButton.className = 'control-area';
     waveButton.tabIndex = 0;
     waveButton.setAttribute('aria-label', 'Waveform control');
     waveButton.innerHTML = '<div class="arrow" id="left-arrow">&#9664;</div><div id="waveform-name">triangle</div><div class="arrow" id="right-arrow">&#9654;</div>';
-    waveButton.style.position = 'static';
-    waveButton.style.display = 'flex';
-    waveButton.style.alignItems = 'center';
-    waveButton.style.justifyContent = 'center';
-    waveButton.style.width = '100%';
-    waveButton.style.height = '100%';
-    waveButton.style.fontSize = 'clamp(1.6rem, 3.5vmin, 2.4rem)';
-
-    bottomControlWrap.appendChild(keyButton);
-    bottomControlWrap.appendChild(waveButton);
-    grid.appendChild(bottomControlWrap);
-
-    // -- Controls click events --
+    const volumeControl = document.createElement('div');
+    volumeControl.className = 'volume-control';
+    volumeControl.innerHTML = `
+      <span class="volume-label" id="volume-label" for="volume-slider">Volume</span>
+      <input type="range" min="0" max="1" step="0.01" value="0.4" id="volume-slider" class="volume-slider" aria-label="Volume slider">
+      <span class="volume-value" id="volume-value">40%</span>
+    `;
+    volumeControl.tabIndex = 0;
+    volumeControl.setAttribute('aria-label', 'Volume control');
+    volumeControl.style.outline = 'none';
+    volumeControl.addEventListener('focus', () => {
+      volumeControl.style.boxShadow = '0 0 0 0.575vmin #007aff88';
+    });
+    volumeControl.addEventListener('blur', () => {
+      volumeControl.style.boxShadow = 'none';
+    });
+    volumeControl.addEventListener('keydown', (e) => {
+      const slider = document.getElementById('volume-slider');
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        slider.value = Math.max(0, parseFloat(slider.value) - 0.02);
+        slider.dispatchEvent(new Event('input'));
+        e.preventDefault();
+      }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        slider.value = Math.min(1, parseFloat(slider.value) + 0.02);
+        slider.dispatchEvent(new Event('input'));
+        e.preventDefault();
+      }
+    });
+    controlsBar.appendChild(keyButton);
+    controlsBar.appendChild(waveButton);
+    controlsBar.appendChild(volumeControl);
     document.getElementById("key-left").onclick = () => {
       currentKeyIndex = (currentKeyIndex - 1 + keyNames.length) % keyNames.length;
       document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
@@ -276,50 +365,51 @@
       currentWaveform = waveforms[currentWaveformIndex];
       document.getElementById("waveform-name").textContent = currentWaveform;
     };
-
-    // Highlight for selected control
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeValue = document.getElementById('volume-value');
+    volumeSlider.value = globalVolume;
+    volumeValue.textContent = `${Math.round(globalVolume * 100)}%`;
+    volumeSlider.addEventListener('input', () => {
+      globalVolume = parseFloat(volumeSlider.value);
+      volumeValue.textContent = `${Math.round(globalVolume * 100)}%`;
+    });
     let controlMode = null;
     function selectControl(which) {
       controlMode = which;
       keyButton.classList.toggle('selected', which === 'key');
       waveButton.classList.toggle('selected', which === 'waveform');
+      volumeControl.style.boxShadow = which === 'volume' ? '0 0 0 0.575vmin #007aff88' : 'none';
       if (which === 'key') keyButton.focus();
       if (which === 'waveform') waveButton.focus();
+      if (which === 'volume') volumeControl.focus();
     }
-
     keyButton.onclick = () => selectControl('key');
     keyButton.onfocus = () => selectControl('key');
     waveButton.onclick = () => selectControl('waveform');
     waveButton.onfocus = () => selectControl('waveform');
-
+    volumeControl.onclick = () => selectControl('volume');
+    volumeControl.onfocus = () => selectControl('volume');
     keyButton.onblur = () => keyButton.classList.remove('selected');
     waveButton.onblur = () => waveButton.classList.remove('selected');
-
-    // --- NOTE BUTTONS ---
     buttons.forEach(btn => {
       const div = document.createElement('div');
       div.className = 'note-button';
       div.textContent = btn.name;
       div.style.outline = 'none';
-      if (btn.name === 'Do' && btn.key === '1') div.style.fontSize = 'clamp(6rem, 12vmin, 8rem)';
-      if (btn.name === 'So' && btn.key === '5') div.style.fontSize = 'clamp(4rem, 8vmin, 6rem)';
+      if (btn.name === 'Do' && btn.key === '1') div.style.fontSize = 'min(9.2vw, 9.2vh, 8.05em)'; // 15% larger
+      if (btn.name === 'So' && btn.key === '5') div.style.fontSize = 'min(6.9vw, 6.9vh, 5.18em)'; // 15% larger
       const color = noteColorsByKey[keyNames[currentKeyIndex]][btn.name] || '#ccc';
       div.style.backgroundColor = color;
-
       const rows = [...new Set(btn.cells.map(c => positions[c][0]))];
       const cols = [...new Set(btn.cells.map(c => positions[c][1]))];
-
       const top = Math.min(...rows) * (100 / 11);
-      const left = Math.min(...cols) * (90 / 4);
+      const left = Math.min(...cols) * (100 / 4);
       const height = rows.length * (100 / 11) - 0.5;
-      const width = cols.length * (90 / 4) - 0.5;
-
-      div.style.top = `${top}vmin`;
-      div.style.left = `${left}vmin`;
-      div.style.height = `${height}vmin`;
-      div.style.width = `${width}vmin`;
-
-      // Mouse events
+      const width = cols.length * (100 / 4) - 0.5;
+      div.style.top = `${top}%`;
+      div.style.left = `${left}%`;
+      div.style.height = `${height}%`;
+      div.style.width = `${width}%`;
       div.addEventListener('mousedown', (e) => {
         e.preventDefault();
         startNote(btn.key, noteFrequencies[btn.note]);
@@ -334,8 +424,6 @@
         stopNote(btn.key);
         div.classList.remove('active');
       });
-
-      // Touch events
       div.addEventListener('touchstart', (e) => {
         e.preventDefault();
         startNote(btn.key, noteFrequencies[btn.note]);
@@ -350,14 +438,10 @@
         stopNote(btn.key);
         div.classList.remove('active');
       });
-
       grid.appendChild(div);
       keyToDiv[btn.key] = div;
     });
-
-    // ---- KEYBOARD EVENTS (top-level) ----
     window.addEventListener('keydown', (e) => {
-      // If focus is on a control area, use left/right for control
       if (document.activeElement === keyButton && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
         if (e.key === 'ArrowLeft') document.getElementById('key-left').click();
         else if (e.key === 'ArrowRight') document.getElementById('key-right').click();
@@ -370,7 +454,10 @@
         e.preventDefault();
         return;
       }
-      // For notes
+      if (document.activeElement === volumeControl && (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        e.preventDefault();
+        return;
+      }
       if (!heldKeys.has(e.key)) {
         heldKeys.add(e.key);
         const btn = buttons.find(b => b.key === e.key);
@@ -386,9 +473,38 @@
       if (keyToDiv[e.key]) keyToDiv[e.key].classList.remove('active');
     });
 
-    // -- Init --
-    updateTransposedFrequencies();
-    updateSolfegeColors();
+    // --- Grid should NEVER get wider than maxWidth; always fill all vertical space above controls; centered horizontally ---
+    function resizeGrid() {
+      const controls = document.getElementById('controls-bar');
+      const propGridWrapper = document.querySelector('.proportional-grid-wrapper');
+      const gridEl = document.getElementById('grid');
+      const controlsHeight = controls.getBoundingClientRect().height;
+      const availableHeight = window.innerHeight - controlsHeight;
+
+      // grid width: fixed maximum, or availableHeight * (4/11) (4 columns, 11 rows)
+      const gridRatio = 4/11;
+      let maxWidth = Math.min(window.innerWidth, Math.round(availableHeight * gridRatio * 1.15), 805); // 15% larger than 700px
+      gridEl.style.width = maxWidth + 'px';
+      gridEl.style.height = availableHeight * 1.15 + 'px'; // 15% larger
+      gridEl.style.marginLeft = "auto";
+      gridEl.style.marginRight = "auto";
+      gridEl.style.marginTop = "0";
+      gridEl.style.marginBottom = "0";
+
+      // Scale font-size for all note-buttons and cells for readability
+      const fontSize = Math.min((availableHeight * 1.15)/11, maxWidth/4) * 0.5;
+      gridEl.querySelectorAll('.note-button').forEach(div=>{
+        div.style.fontSize = fontSize + 'px';
+      });
+      gridEl.querySelectorAll('.cell').forEach(div=>{
+        div.style.fontSize = fontSize + 'px';
+      });
+    }
+    window.addEventListener('resize', resizeGrid);
+    window.addEventListener('DOMContentLoaded', resizeGrid);
+    setTimeout(resizeGrid, 200);
+    const mq = window.matchMedia("(max-width: 550px)");
+    mq.addEventListener("change", resizeGrid);
   </script>
 </body>
 </html>

@@ -57,7 +57,7 @@
       z-index: 1;
     }
     .note-button { z-index: 2; }
-    .active { transform: scale(1.08); }
+    .active { transform: scale(1.30); }
     .control-area {
       outline: none;
       border-radius: 0.8vmin;
@@ -105,7 +105,6 @@
       margin-left: 0.3em;
       letter-spacing: 0.04em;
     }
-    /* Custom style to ensure images fit and are centered in their cells */
     .cell img.solfege-img {
       max-width: 80%;
       max-height: 80%;
@@ -213,6 +212,9 @@
     // Track which notes are currently down (for re-firing on accidental key change)
     const heldNoteKeys = new Set();
 
+    // Touch accidental buttons state
+    let accidentalTouch = null; // "sharp", "flat", or null
+
     function startNote(key, freq) {
       stopNote(key);
       let osc, gain, lfo, lfoGain, filter;
@@ -297,8 +299,12 @@
       delete activeOscillators[key];
     }
 
-    // --- Accidental helpers for keyboard ---
+    // --- Accidental helpers for keyboard and touch ---
     function getAccidentalShift() {
+      // Touch accidental (overrides keyboard accidental if set)
+      if (accidentalTouch === "sharp") return 1;
+      if (accidentalTouch === "flat") return -1;
+
       if (accidentalHeld.sharp && accidentalHeld.flat) return 0;
       if (accidentalHeld.sharp) return 1;
       if (accidentalHeld.flat) return -1;
@@ -323,13 +329,10 @@
     }
 
     function reTriggerHeldKeysAccidentals() {
-      // For all currently held note keys
       for (const key of heldNoteKeys) {
-        // Stop all accidental versions for this key first
         stopNote(`${key}_0`);
         stopNote(`${key}_1`);
         stopNote(`${key}_-1`);
-        // Start new oscillator with current accidental
         const btn = buttons.find(b => b.key === key);
         if (!btn) continue;
         const accidental = getAccidentalShift();
@@ -339,7 +342,7 @@
       }
     }
 
-    // --- Grid and Controls setup (same as before!) ---
+    // --- Grid and Controls setup ---
     const positions = {
       '10a': [9, 0], '10b': [9, 1], '10c': [9, 2], '10d': [9, 3],
       '3a': [2, 0], '4a': [3, 0], '3b': [2, 1], '4b': [3, 1], '3c': [2, 2], '4c': [3, 2],
@@ -420,6 +423,61 @@
     // ---- Insert images into 6d and 7d ----
     cellRefs['6d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppSharpSign2.png" alt="Sharp">';
     cellRefs['7d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppFlatSign2.png" alt="Flat">';
+
+    // ---- Add touch/mouse accidental event listeners to 6d and 7d ----
+    // Helper to clear accidental touch state and active classes
+    function clearTouchAccidental() {
+      accidentalTouch = null;
+      cellRefs['6d'].classList.remove('active');
+      cellRefs['7d'].classList.remove('active');
+    }
+
+    // Touch/Mouse event for sharp (6d)
+    function accidentalSharpStart(e) {
+      e.preventDefault();
+      accidentalTouch = "sharp";
+      cellRefs['6d'].classList.add('active');
+      cellRefs['7d'].classList.remove('active');
+    }
+    function accidentalSharpEnd(e) {
+      accidentalTouch = null;
+      cellRefs['6d'].classList.remove('active');
+    }
+
+    cellRefs['6d'].addEventListener('touchstart', accidentalSharpStart);
+    cellRefs['6d'].addEventListener('mousedown', accidentalSharpStart);
+    cellRefs['6d'].addEventListener('touchend', accidentalSharpEnd);
+    cellRefs['6d'].addEventListener('mouseup', accidentalSharpEnd);
+    cellRefs['6d'].addEventListener('mouseleave', accidentalSharpEnd);
+    cellRefs['6d'].addEventListener('touchcancel', accidentalSharpEnd);
+
+    // Touch/Mouse event for flat (7d)
+    function accidentalFlatStart(e) {
+      e.preventDefault();
+      accidentalTouch = "flat";
+      cellRefs['7d'].classList.add('active');
+      cellRefs['6d'].classList.remove('active');
+    }
+    function accidentalFlatEnd(e) {
+      accidentalTouch = null;
+      cellRefs['7d'].classList.remove('active');
+    }
+
+    cellRefs['7d'].addEventListener('touchstart', accidentalFlatStart);
+    cellRefs['7d'].addEventListener('mousedown', accidentalFlatStart);
+    cellRefs['7d'].addEventListener('touchend', accidentalFlatEnd);
+    cellRefs['7d'].addEventListener('mouseup', accidentalFlatEnd);
+    cellRefs['7d'].addEventListener('mouseleave', accidentalFlatEnd);
+    cellRefs['7d'].addEventListener('touchcancel', accidentalFlatEnd);
+
+    // Clear accidentalTouch if user taps elsewhere on the grid (for touch UX)
+    grid.addEventListener('touchstart', function(e) {
+      // Only clear if not on 6d or 7d
+      const touchedCell = e.target.closest('.cell');
+      if (touchedCell !== cellRefs['6d'] && touchedCell !== cellRefs['7d']) {
+        clearTouchAccidental();
+      }
+    });
 
     // ---- CONTROLS (top bar) ----
     const controlsBar = document.getElementById('controls-bar');
@@ -532,31 +590,58 @@
       div.style.width = `${width}%`;
       div.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        startNote(btn.key + "_0", noteFrequencies[btn.note]);
-        div.classList.add('active');
+        // If accidentalTouch is active, play the note with accidental
+        if (accidentalTouch) {
+          // Set accidental state, play, then clear accidentalTouch
+          handlePlayKey(btn.key);
+          setTimeout(() => {
+            handleStopKey(btn.key);
+            clearTouchAccidental();
+          }, 250); // Play briefly, then clear accidental
+          div.classList.add('active');
+          setTimeout(() => div.classList.remove('active'), 250);
+        } else {
+          startNote(btn.key + "_0", noteFrequencies[btn.note]);
+          div.classList.add('active');
+        }
         window.focus();
       });
       div.addEventListener('mouseup', () => {
         stopNote(btn.key + "_0");
         div.classList.remove('active');
+        clearTouchAccidental();
       });
       div.addEventListener('mouseleave', () => {
         stopNote(btn.key + "_0");
         div.classList.remove('active');
+        clearTouchAccidental();
       });
       div.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        startNote(btn.key + "_0", noteFrequencies[btn.note]);
-        div.classList.add('active');
+        // If accidentalTouch is active, play the note with accidental
+        if (accidentalTouch) {
+          handlePlayKey(btn.key);
+          setTimeout(() => {
+            handleStopKey(btn.key);
+            clearTouchAccidental();
+          }, 250);
+          div.classList.add('active');
+          setTimeout(() => div.classList.remove('active'), 250);
+        } else {
+          startNote(btn.key + "_0", noteFrequencies[btn.note]);
+          div.classList.add('active');
+        }
         window.focus();
       });
       div.addEventListener('touchend', () => {
         stopNote(btn.key + "_0");
         div.classList.remove('active');
+        clearTouchAccidental();
       });
       div.addEventListener('touchcancel', () => {
         stopNote(btn.key + "_0");
         div.classList.remove('active');
+        clearTouchAccidental();
       });
       grid.appendChild(div);
       keyToDiv[btn.key] = div;
@@ -566,8 +651,15 @@
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       let accidentalChanged = false;
-      if (e.key === '=') { accidentalHeld.sharp = true; accidentalChanged = true; }
-      if (e.key === '-') { accidentalHeld.flat = true; accidentalChanged = true; }
+      // For sharp/flat image highlighting:
+      if (e.key === '=') {
+        accidentalHeld.sharp = true; accidentalChanged = true;
+        cellRefs['6d'].classList.add('active');
+      }
+      if (e.key === '-') {
+        accidentalHeld.flat = true; accidentalChanged = true;
+        cellRefs['7d'].classList.add('active');
+      }
       // Controls bar navigation
       if (document.activeElement === keyButton && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
         if (e.key === 'ArrowLeft') document.getElementById('key-left').click();
@@ -599,8 +691,14 @@
 
     window.addEventListener('keyup', (e) => {
       let accidentalChanged = false;
-      if (e.key === '=') { accidentalHeld.sharp = false; accidentalChanged = true; }
-      if (e.key === '-') { accidentalHeld.flat = false; accidentalChanged = true; }
+      if (e.key === '=') {
+        accidentalHeld.sharp = false; accidentalChanged = true;
+        cellRefs['6d'].classList.remove('active');
+      }
+      if (e.key === '-') {
+        accidentalHeld.flat = false; accidentalChanged = true;
+        cellRefs['7d'].classList.remove('active');
+      }
       if (heldKeys.has(e.key)) {
         heldKeys.delete(e.key);
         handleStopKey(e.key);

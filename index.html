@@ -147,7 +147,6 @@
   <script>
     // --- AUDIO & STATE ---
     const context = new (window.AudioContext || window.webkitAudioContext)();
-    // Now five options, voice is last!
     const waveforms = ['sine', 'triangle', 'square', 'sawtooth', 'voice'];
     let currentWaveformIndex = 1;
     let currentWaveform = waveforms[currentWaveformIndex];
@@ -202,15 +201,15 @@
 
     const activeOscillators = {};
     const heldKeys = new Set();
+    // Track accidental state
+    const accidentalHeld = { sharp: false, flat: false };
+    // Track which notes are currently down (for re-firing on accidental key change)
+    const heldNoteKeys = new Set();
 
     function startNote(key, freq) {
-      // Fix for stuck notes: always stop previous sound for this key
       stopNote(key);
-
       let osc, gain, lfo, lfoGain, filter;
-
       gain = context.createGain();
-
       if (currentWaveform === "voice") {
         osc = context.createOscillator();
         osc.setPeriodicWave(customVoiceWave);
@@ -271,12 +270,11 @@
     function stopNote(key) {
       const active = activeOscillators[key];
       if (!active) return;
-
       const now = context.currentTime;
       if (currentWaveform === "voice") {
         active.gain.gain.cancelScheduledValues(now);
         active.gain.gain.setValueAtTime(active.gain.gain.value, now);
-        const releaseTime = 0.6; // Smoother tail
+        const releaseTime = 0.6;
         const stopBuffer = 0.1;
         active.gain.gain.linearRampToValueAtTime(0.0001, now + releaseTime);
         active.osc.stop(now + releaseTime + stopBuffer);
@@ -290,6 +288,48 @@
         active.osc.stop(now + releaseTime + stopBuffer);
       }
       delete activeOscillators[key];
+    }
+
+    // --- Accidental helpers for keyboard ---
+    function getAccidentalShift() {
+      if (accidentalHeld.sharp && accidentalHeld.flat) return 0;
+      if (accidentalHeld.sharp) return 1;
+      if (accidentalHeld.flat) return -1;
+      return 0;
+    }
+
+    function handlePlayKey(key) {
+      const btn = buttons.find(b => b.key === key);
+      if (!btn) return;
+      heldNoteKeys.add(key);
+      const accidental = getAccidentalShift();
+      const oscKey = `${key}_${accidental}`;
+      const freq = noteFrequencies[btn.note] * Math.pow(2, accidental / 12);
+      startNote(oscKey, freq);
+    }
+
+    function handleStopKey(key) {
+      heldNoteKeys.delete(key);
+      stopNote(`${key}_0`);
+      stopNote(`${key}_1`);
+      stopNote(`${key}_-1`);
+    }
+
+    function reTriggerHeldKeysAccidentals() {
+      // For all currently held note keys
+      for (const key of heldNoteKeys) {
+        // Stop all accidental versions for this key first
+        stopNote(`${key}_0`);
+        stopNote(`${key}_1`);
+        stopNote(`${key}_-1`);
+        // Start new oscillator with current accidental
+        const btn = buttons.find(b => b.key === key);
+        if (!btn) continue;
+        const accidental = getAccidentalShift();
+        const oscKey = `${key}_${accidental}`;
+        const freq = noteFrequencies[btn.note] * Math.pow(2, accidental / 12);
+        startNote(oscKey, freq);
+      }
     }
 
     // --- Grid and Controls setup (same as before!) ---
@@ -470,36 +510,43 @@
       div.style.width = `${width}%`;
       div.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        startNote(btn.key, noteFrequencies[btn.note]);
+        startNote(btn.key + "_0", noteFrequencies[btn.note]);
         div.classList.add('active');
         window.focus();
       });
       div.addEventListener('mouseup', () => {
-        stopNote(btn.key);
+        stopNote(btn.key + "_0");
         div.classList.remove('active');
       });
       div.addEventListener('mouseleave', () => {
-        stopNote(btn.key);
+        stopNote(btn.key + "_0");
         div.classList.remove('active');
       });
       div.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        startNote(btn.key, noteFrequencies[btn.note]);
+        startNote(btn.key + "_0", noteFrequencies[btn.note]);
         div.classList.add('active');
         window.focus();
       });
       div.addEventListener('touchend', () => {
-        stopNote(btn.key);
+        stopNote(btn.key + "_0");
         div.classList.remove('active');
       });
       div.addEventListener('touchcancel', () => {
-        stopNote(btn.key);
+        stopNote(btn.key + "_0");
         div.classList.remove('active');
       });
       grid.appendChild(div);
       keyToDiv[btn.key] = div;
     });
+
+    // --- Enhanced keyboard accidental support ---
     window.addEventListener('keydown', (e) => {
+      if (e.repeat) return;
+      let accidentalChanged = false;
+      if (e.key === '=') { accidentalHeld.sharp = true; accidentalChanged = true; }
+      if (e.key === '-') { accidentalHeld.flat = true; accidentalChanged = true; }
+      // Controls bar navigation
       if (document.activeElement === keyButton && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
         if (e.key === 'ArrowLeft') document.getElementById('key-left').click();
         else if (e.key === 'ArrowRight') document.getElementById('key-right').click();
@@ -516,19 +563,31 @@
         e.preventDefault();
         return;
       }
-      if (!heldKeys.has(e.key)) {
+      // Only process note keys
+      if (!heldKeys.has(e.key) && buttons.some(b => b.key === e.key)) {
         heldKeys.add(e.key);
-        const btn = buttons.find(b => b.key === e.key);
-        if (btn) {
-          startNote(btn.key, noteFrequencies[btn.note]);
-          if (keyToDiv[btn.key]) keyToDiv[btn.key].classList.add('active');
-        }
+        handlePlayKey(e.key);
+        if (keyToDiv[e.key]) keyToDiv[e.key].classList.add('active');
+      }
+      // If accidental changed, re-trigger all held notes
+      if (accidentalChanged) {
+        reTriggerHeldKeysAccidentals();
       }
     });
+
     window.addEventListener('keyup', (e) => {
-      heldKeys.delete(e.key);
-      stopNote(e.key);
-      if (keyToDiv[e.key]) keyToDiv[e.key].classList.remove('active');
+      let accidentalChanged = false;
+      if (e.key === '=') { accidentalHeld.sharp = false; accidentalChanged = true; }
+      if (e.key === '-') { accidentalHeld.flat = false; accidentalChanged = true; }
+      if (heldKeys.has(e.key)) {
+        heldKeys.delete(e.key);
+        handleStopKey(e.key);
+        if (keyToDiv[e.key]) keyToDiv[e.key].classList.remove('active');
+      }
+      // If accidental changed, re-trigger all held notes
+      if (accidentalChanged) {
+        reTriggerHeldKeysAccidentals();
+      }
     });
 
     // --- Responsive grid ---

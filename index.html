@@ -194,11 +194,10 @@
       'B': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' }
     };
 
-    // "Voice" waveform setup
     const harmonics = 20;
     const real = new Float32Array(harmonics);
     const imag = new Float32Array(harmonics);
-    real[1] = 1; // fundamental
+    real[1] = 1;
     real[2] = 0.15;
     real[3] = 0.1;
     real[4] = 0.05;
@@ -207,13 +206,20 @@
 
     const activeOscillators = {};
     const heldKeys = new Set();
-    // Track accidental state
     const accidentalHeld = { sharp: false, flat: false };
-    // Track which notes are currently down (for re-firing on accidental key change)
     const heldNoteKeys = new Set();
+    let sharpTouchHeld = false;
+    let flatTouchHeld = false;
 
-    // Touch accidental buttons state
-    let accidentalTouch = null; // "sharp", "flat", or null
+    function getAccidentalShift() {
+      if (sharpTouchHeld && flatTouchHeld) return 0;
+      if (sharpTouchHeld) return 1;
+      if (flatTouchHeld) return -1;
+      if (accidentalHeld.sharp && accidentalHeld.flat) return 0;
+      if (accidentalHeld.sharp) return 1;
+      if (accidentalHeld.flat) return -1;
+      return 0;
+    }
 
     function startNote(key, freq) {
       stopNote(key);
@@ -223,26 +229,20 @@
         osc = context.createOscillator();
         osc.setPeriodicWave(customVoiceWave);
         osc.frequency.value = freq;
-
         lfo = context.createOscillator();
         lfoGain = context.createGain();
         lfo.frequency.setValueAtTime(1.5, context.currentTime);
         lfo.frequency.linearRampToValueAtTime(5, context.currentTime + 1);
         lfoGain.gain.setValueAtTime(2.0, context.currentTime);
-
         lfo.connect(lfoGain);
         lfoGain.connect(osc.frequency);
         lfo.start();
-
         filter = context.createBiquadFilter();
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(1200, context.currentTime);
         filter.Q.value = 1;
-
         osc.connect(filter);
         filter.connect(gain);
-
-        // ADSR Envelope
         const now = context.currentTime;
         const attackTime = 0.08;
         const decayTime = 0.18;
@@ -251,27 +251,22 @@
         gain.gain.setValueAtTime(0, now);
         gain.gain.linearRampToValueAtTime(maxLevel, now + attackTime);
         gain.gain.linearRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
-
         gain.connect(context.destination);
         osc.start();
-
         activeOscillators[key] = { osc, gain, lfo, lfoGain, filter };
       } else {
         osc = context.createOscillator();
         osc.type = currentWaveform;
         osc.frequency.value = freq;
-
         filter = context.createBiquadFilter();
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(1200, context.currentTime);
         filter.Q.value = 1;
-
         osc.connect(filter);
         filter.connect(gain);
         gain.connect(context.destination);
         gain.gain.setValueAtTime(globalVolume, context.currentTime);
         osc.start();
-
         activeOscillators[key] = { osc, gain, filter };
       }
     }
@@ -297,18 +292,6 @@
         active.osc.stop(now + releaseTime + stopBuffer);
       }
       delete activeOscillators[key];
-    }
-
-    // --- Accidental helpers for keyboard and touch ---
-    function getAccidentalShift() {
-      // Touch accidental (overrides keyboard accidental if set)
-      if (accidentalTouch === "sharp") return 1;
-      if (accidentalTouch === "flat") return -1;
-
-      if (accidentalHeld.sharp && accidentalHeld.flat) return 0;
-      if (accidentalHeld.sharp) return 1;
-      if (accidentalHeld.flat) return -1;
-      return 0;
     }
 
     function handlePlayKey(key) {
@@ -342,7 +325,6 @@
       }
     }
 
-    // --- Grid and Controls setup ---
     const positions = {
       '10a': [9, 0], '10b': [9, 1], '10c': [9, 2], '10d': [9, 3],
       '3a': [2, 0], '4a': [3, 0], '3b': [2, 1], '4b': [3, 1], '3c': [2, 2], '4c': [3, 2],
@@ -400,86 +382,52 @@
       });
     }
 
-    // ---- GRID CELLS ----
-    // Store references and ABSOLUTELY POSITION the cells in a 4x11 grid
     const cellRefs = {};
     for (let r = 0; r < 11; r++) {
       for (let c = 0; c < 4; c++) {
         const div = document.createElement('div');
         div.className = 'cell';
-        // Position absolutely in the grid
         div.style.top = (r * (100 / 11)) + '%';
         div.style.left = (c * (100 / 4)) + '%';
         div.style.width = (100 / 4 - 0.5) + '%';
         div.style.height = (100 / 11 - 0.5) + '%';
-        // Store reference for e.g. "6d" (row=5, col=3)
-        const rowNum = r + 1; // 1-based
-        const colLetter = String.fromCharCode(97 + c); // 0->a, 1->b, ...
+        const rowNum = r + 1;
+        const colLetter = String.fromCharCode(97 + c);
         cellRefs[`${rowNum}${colLetter}`] = div;
         grid.appendChild(div);
       }
     }
 
-    // ---- Insert images into 6d and 7d ----
     cellRefs['6d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppSharpSign2.png" alt="Sharp">';
     cellRefs['7d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppFlatSign2.png" alt="Flat">';
 
-    // ---- Add touch/mouse accidental event listeners to 6d and 7d ----
-    // Helper to clear accidental touch state and active classes
-    function clearTouchAccidental() {
-      accidentalTouch = null;
-      cellRefs['6d'].classList.remove('active');
-      cellRefs['7d'].classList.remove('active');
+    function setSharpTouchHeld(val) {
+      sharpTouchHeld = val;
+      if (val) cellRefs['6d'].classList.add('active');
+      else cellRefs['6d'].classList.remove('active');
+      reTriggerHeldKeysAccidentals();
+    }
+    function setFlatTouchHeld(val) {
+      flatTouchHeld = val;
+      if (val) cellRefs['7d'].classList.add('active');
+      else cellRefs['7d'].classList.remove('active');
+      reTriggerHeldKeysAccidentals();
     }
 
-    // Touch/Mouse event for sharp (6d)
-    function accidentalSharpStart(e) {
-      e.preventDefault();
-      accidentalTouch = "sharp";
-      cellRefs['6d'].classList.add('active');
-      cellRefs['7d'].classList.remove('active');
-    }
-    function accidentalSharpEnd(e) {
-      accidentalTouch = null;
-      cellRefs['6d'].classList.remove('active');
-    }
+    cellRefs['6d'].addEventListener('touchstart', function(e) { e.preventDefault(); setSharpTouchHeld(true); });
+    cellRefs['6d'].addEventListener('mousedown', function(e) { e.preventDefault(); setSharpTouchHeld(true); });
+    cellRefs['6d'].addEventListener('touchend', function(e) { setSharpTouchHeld(false); });
+    cellRefs['6d'].addEventListener('mouseup', function(e) { setSharpTouchHeld(false); });
+    cellRefs['6d'].addEventListener('mouseleave', function(e) { setSharpTouchHeld(false); });
+    cellRefs['6d'].addEventListener('touchcancel', function(e) { setSharpTouchHeld(false); });
 
-    cellRefs['6d'].addEventListener('touchstart', accidentalSharpStart);
-    cellRefs['6d'].addEventListener('mousedown', accidentalSharpStart);
-    cellRefs['6d'].addEventListener('touchend', accidentalSharpEnd);
-    cellRefs['6d'].addEventListener('mouseup', accidentalSharpEnd);
-    cellRefs['6d'].addEventListener('mouseleave', accidentalSharpEnd);
-    cellRefs['6d'].addEventListener('touchcancel', accidentalSharpEnd);
+    cellRefs['7d'].addEventListener('touchstart', function(e) { e.preventDefault(); setFlatTouchHeld(true); });
+    cellRefs['7d'].addEventListener('mousedown', function(e) { e.preventDefault(); setFlatTouchHeld(true); });
+    cellRefs['7d'].addEventListener('touchend', function(e) { setFlatTouchHeld(false); });
+    cellRefs['7d'].addEventListener('mouseup', function(e) { setFlatTouchHeld(false); });
+    cellRefs['7d'].addEventListener('mouseleave', function(e) { setFlatTouchHeld(false); });
+    cellRefs['7d'].addEventListener('touchcancel', function(e) { setFlatTouchHeld(false); });
 
-    // Touch/Mouse event for flat (7d)
-    function accidentalFlatStart(e) {
-      e.preventDefault();
-      accidentalTouch = "flat";
-      cellRefs['7d'].classList.add('active');
-      cellRefs['6d'].classList.remove('active');
-    }
-    function accidentalFlatEnd(e) {
-      accidentalTouch = null;
-      cellRefs['7d'].classList.remove('active');
-    }
-
-    cellRefs['7d'].addEventListener('touchstart', accidentalFlatStart);
-    cellRefs['7d'].addEventListener('mousedown', accidentalFlatStart);
-    cellRefs['7d'].addEventListener('touchend', accidentalFlatEnd);
-    cellRefs['7d'].addEventListener('mouseup', accidentalFlatEnd);
-    cellRefs['7d'].addEventListener('mouseleave', accidentalFlatEnd);
-    cellRefs['7d'].addEventListener('touchcancel', accidentalFlatEnd);
-
-    // Clear accidentalTouch if user taps elsewhere on the grid (for touch UX)
-    grid.addEventListener('touchstart', function(e) {
-      // Only clear if not on 6d or 7d
-      const touchedCell = e.target.closest('.cell');
-      if (touchedCell !== cellRefs['6d'] && touchedCell !== cellRefs['7d']) {
-        clearTouchAccidental();
-      }
-    });
-
-    // ---- CONTROLS (top bar) ----
     const controlsBar = document.getElementById('controls-bar');
     const keyButton = document.createElement('div');
     keyButton.className = 'control-area';
@@ -588,70 +536,48 @@
       div.style.left = `${left}%`;
       div.style.height = `${height}%`;
       div.style.width = `${width}%`;
+      let isTouching = false;
       div.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        // If accidentalTouch is active, play the note with accidental
-        if (accidentalTouch) {
-          // Set accidental state, play, then clear accidentalTouch
-          handlePlayKey(btn.key);
-          setTimeout(() => {
-            handleStopKey(btn.key);
-            clearTouchAccidental();
-          }, 250); // Play briefly, then clear accidental
-          div.classList.add('active');
-          setTimeout(() => div.classList.remove('active'), 250);
-        } else {
-          startNote(btn.key + "_0", noteFrequencies[btn.note]);
-          div.classList.add('active');
-        }
+        isTouching = true;
+        handlePlayKey(btn.key);
+        div.classList.add('active');
         window.focus();
       });
       div.addEventListener('mouseup', () => {
-        stopNote(btn.key + "_0");
+        isTouching = false;
+        handleStopKey(btn.key);
         div.classList.remove('active');
-        clearTouchAccidental();
       });
       div.addEventListener('mouseleave', () => {
-        stopNote(btn.key + "_0");
+        isTouching = false;
+        handleStopKey(btn.key);
         div.classList.remove('active');
-        clearTouchAccidental();
       });
       div.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        // If accidentalTouch is active, play the note with accidental
-        if (accidentalTouch) {
-          handlePlayKey(btn.key);
-          setTimeout(() => {
-            handleStopKey(btn.key);
-            clearTouchAccidental();
-          }, 250);
-          div.classList.add('active');
-          setTimeout(() => div.classList.remove('active'), 250);
-        } else {
-          startNote(btn.key + "_0", noteFrequencies[btn.note]);
-          div.classList.add('active');
-        }
+        isTouching = true;
+        handlePlayKey(btn.key);
+        div.classList.add('active');
         window.focus();
       });
       div.addEventListener('touchend', () => {
-        stopNote(btn.key + "_0");
+        isTouching = false;
+        handleStopKey(btn.key);
         div.classList.remove('active');
-        clearTouchAccidental();
       });
       div.addEventListener('touchcancel', () => {
-        stopNote(btn.key + "_0");
+        isTouching = false;
+        handleStopKey(btn.key);
         div.classList.remove('active');
-        clearTouchAccidental();
       });
       grid.appendChild(div);
       keyToDiv[btn.key] = div;
     });
 
-    // --- Enhanced keyboard accidental support ---
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       let accidentalChanged = false;
-      // For sharp/flat image highlighting:
       if (e.key === '=') {
         accidentalHeld.sharp = true; accidentalChanged = true;
         cellRefs['6d'].classList.add('active');
@@ -660,7 +586,6 @@
         accidentalHeld.flat = true; accidentalChanged = true;
         cellRefs['7d'].classList.add('active');
       }
-      // Controls bar navigation
       if (document.activeElement === keyButton && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
         if (e.key === 'ArrowLeft') document.getElementById('key-left').click();
         else if (e.key === 'ArrowRight') document.getElementById('key-right').click();
@@ -677,13 +602,11 @@
         e.preventDefault();
         return;
       }
-      // Only process note keys
       if (!heldKeys.has(e.key) && buttons.some(b => b.key === e.key)) {
         heldKeys.add(e.key);
         handlePlayKey(e.key);
         if (keyToDiv[e.key]) keyToDiv[e.key].classList.add('active');
       }
-      // If accidental changed, re-trigger all held notes
       if (accidentalChanged) {
         reTriggerHeldKeysAccidentals();
       }
@@ -704,41 +627,31 @@
         handleStopKey(e.key);
         if (keyToDiv[e.key]) keyToDiv[e.key].classList.remove('active');
       }
-      // If accidental changed, re-trigger all held notes
       if (accidentalChanged) {
         reTriggerHeldKeysAccidentals();
       }
     });
 
-    // --- Responsive grid ---
     function resizeGrid() {
       const gridEl = document.getElementById('grid');
       const gridWrapper = document.querySelector('.proportional-grid-wrapper');
       const gwRect = gridWrapper.getBoundingClientRect();
       const availableWidth = gwRect.width;
       const availableHeight = gwRect.height;
-
-      // Aspect ratio
       const aspectW = 4;
       const aspectH = 11;
-
-      // Calculate max grid size that fits
       let gridWidth = availableHeight * (aspectW/aspectH);
       let gridHeight = availableHeight;
-
       if (gridWidth > availableWidth) {
         gridWidth = availableWidth;
         gridHeight = availableWidth * (aspectH/aspectW);
       }
-
       gridEl.style.width = gridWidth + 'px';
       gridEl.style.height = gridHeight + 'px';
       gridEl.style.marginLeft = "auto";
       gridEl.style.marginRight = "auto";
       gridEl.style.marginTop = "0";
       gridEl.style.marginBottom = "0";
-
-      // Set font size based on cell size
       const fontSize = Math.min(gridHeight / 11, gridWidth / 4) * 0.5;
       gridEl.querySelectorAll('.note-button').forEach(div=>{
         div.style.fontSize = fontSize + 'px';

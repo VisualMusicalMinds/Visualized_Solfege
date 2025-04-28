@@ -19,25 +19,7 @@ html, body, #app-wrapper, .main-content {
   flex-grow: 0;
   flex-basis: auto;
   transition: flex-direction 0.2s;
-  position: relative;
 }
-
-.controls-content {
-  display: flex;
-  flex-direction: row;
-  gap: 1.5vw;
-  width: 100%;
-  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
-  max-height: 100px;
-  overflow: visible;
-}
-.controls-content:not(.open) {
-  display: flex;
-}
-.accordion-toggle {
-  display: none; /* Default hidden, shown by media query on mobile */
-}
-
 .main-content {
   flex: 1 1 0;
   display: flex; flex-direction: column;
@@ -135,21 +117,6 @@ html, body, #app-wrapper, .main-content {
     padding-bottom: 0;
     padding-top: 0;
   }
-  .controls-content {
-    flex-direction: column;
-    gap: 0;
-    align-items: stretch;
-    padding: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
-    /* Hide by default on mobile, unless .open */
-  }
-  .controls-content.open {
-    max-height: 300px;
-    padding: 0.5em 0 0.5em 0;
-    overflow: visible;
-  }
   .control-area, .volume-control {
     width: 100%;
     margin: 0;
@@ -164,27 +131,5 @@ html, body, #app-wrapper, .main-content {
   }
   .controls-bar > *:last-child {
     border-bottom: none !important;
-  }
-  .accordion-toggle {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    border: none;
-    background: #fff;
-    font-size: clamp(1rem, 2vw, 1.3em);
-    font-weight: bold;
-    padding: 0.3em 1em;
-    border-radius: 0.8vmin;
-    box-shadow: 0 1px 4px #0002;
-    transition: background 0.2s;
-    gap: 0.5em;
-    margin: 0.3em 0.5em 0 0.5em;
-  }
-  .accordion-toggle .arrow {
-    font-size: 1.2em;
-    transition: transform 0.2s;
-  }
-  .accordion-toggle.open .arrow {
-    transform: rotate(90deg);
   }
 }

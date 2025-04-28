@@ -131,5 +131,51 @@ html, body, #app-wrapper, .main-content {
   }
   .controls-bar > *:last-child {
     border-bottom: none !important;
+  }.accordion-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  background: #fff;
+  font-size: clamp(1rem, 2vw, 1.3em);
+  font-weight: bold;
+  padding: 0.3em 1em;
+  border-radius: 0.8vmin;
+  box-shadow: 0 1px 4px #0002;
+  transition: background 0.2s;
+  gap: 0.5em;
+}
+.accordion-toggle .arrow {
+  font-size: 1.2em;
+  transition: transform 0.2s;
+}
+.accordion-toggle.open .arrow {
+  transform: rotate(90deg);
+}
+.accordion-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+  background: #faf8f0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1vw;
+  padding: 0 0.5vmin;
+}
+.accordion-content.open {
+  max-height: 250px;
+  padding: 0.5em 0.5vmin;
+}
+@media (max-width: 550px) {
+  .accordion-content {
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch;
+    padding: 0;
+  }
+  .accordion-content.open {
+    max-height: 500px;
+    padding: 0.5em 0;
   }
 }

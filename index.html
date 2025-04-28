@@ -8,9 +8,7 @@
 </head>
 <body>
   <div id="app-wrapper">
-    <div class="controls-bar" id="controls-bar">
-      <div class="controls-content" id="controls-content"></div>
-    </div>
+    <div class="controls-bar" id="controls-bar"></div>
     <div class="main-content">
       <div class="proportional-grid-wrapper">
         <div class="grid" id="grid"></div>
@@ -295,51 +293,97 @@
     cellRefs['7d'].addEventListener('mouseleave', function(e) { setFlatTouchHeld(false); });
     cellRefs['7d'].addEventListener('touchcancel', function(e) { setFlatTouchHeld(false); });
 
-    // --------- CONTROLS SETUP WITH ACCORDION FIX ---------
-    // Use controlsContent, NOT controlsBar
-    controlsContent.appendChild(keyButton);
-    controlsContent.appendChild(waveButton);
-    controlsContent.appendChild(volumeControl);
-
-    // Accordion toggle for mobile
-    const accordionToggle = document.createElement('button');
-    accordionToggle.className = 'accordion-toggle';
-    accordionToggle.setAttribute('aria-expanded', 'false');
-    accordionToggle.innerHTML = '<span>Show Controls</span> <span class="arrow">&#9654;</span>';
-
-    let accordionOpen = false;
-
-    function setAccordion(open) {
-      accordionOpen = open;
-      accordionToggle.setAttribute('aria-expanded', open);
-      controlsContent.classList.toggle('open', open);
-      accordionToggle.classList.toggle('open', open);
-      accordionToggle.querySelector('span').textContent = open ? 'Hide Controls' : 'Show Controls';
-    }
-
-    accordionToggle.onclick = () => setAccordion(!accordionOpen);
-
-    function handleAccordionDisplay() {
-      const isMobile = window.matchMedia('(max-width: 550px)').matches;
-      if (isMobile) {
-        if (!controlsBar.contains(accordionToggle)) {
-          controlsBar.insertBefore(accordionToggle, controlsBar.firstChild);
-        }
-        if (!accordionOpen) {
-          controlsContent.classList.remove('open');
-        }
-      } else {
-        if (controlsBar.contains(accordionToggle)) {
-          controlsBar.removeChild(accordionToggle);
-        }
-        controlsContent.classList.add('open');
+    const controlsBar = document.getElementById('controls-bar');
+    const keyButton = document.createElement('div');
+    keyButton.className = 'control-area';
+    keyButton.tabIndex = 0;
+    keyButton.setAttribute('aria-label', 'Key control');
+    keyButton.innerHTML = '<div class="arrow" id="key-left">&#9664;</div><div id="key-name">C Major</div><div class="arrow" id="key-right">&#9654;</div>';
+    const waveButton = document.createElement('div');
+    waveButton.className = 'control-area';
+    waveButton.tabIndex = 0;
+    waveButton.setAttribute('aria-label', 'Waveform control');
+    waveButton.innerHTML = '<div class="arrow" id="left-arrow">&#9664;</div><div id="waveform-name">triangle</div><div class="arrow" id="right-arrow">&#9654;</div>';
+    const volumeControl = document.createElement('div');
+    volumeControl.className = 'volume-control';
+    volumeControl.innerHTML = `
+      <span class="volume-label" id="volume-label" for="volume-slider">Volume</span>
+      <input type="range" min="0" max="1" step="0.01" value="0.4" id="volume-slider" class="volume-slider" aria-label="Volume slider">
+      <span class="volume-value" id="volume-value">40%</span>
+    `;
+    volumeControl.tabIndex = 0;
+    volumeControl.setAttribute('aria-label', 'Volume control');
+    volumeControl.style.outline = 'none';
+    volumeControl.addEventListener('focus', () => {
+      volumeControl.style.boxShadow = '0 0 0 0.5vmin #007aff88';
+    });
+    volumeControl.addEventListener('blur', () => {
+      volumeControl.style.boxShadow = 'none';
+    });
+    volumeControl.addEventListener('keydown', (e) => {
+      const slider = document.getElementById('volume-slider');
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        slider.value = Math.max(0, parseFloat(slider.value) - 0.02);
+        slider.dispatchEvent(new Event('input'));
+        e.preventDefault();
       }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        slider.value = Math.min(1, parseFloat(slider.value) + 0.02);
+        slider.dispatchEvent(new Event('input'));
+        e.preventDefault();
+      }
+    });
+    controlsBar.appendChild(keyButton);
+    controlsBar.appendChild(waveButton);
+    controlsBar.appendChild(volumeControl);
+    document.getElementById("key-left").onclick = () => {
+      currentKeyIndex = (currentKeyIndex - 1 + keyNames.length) % keyNames.length;
+      document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
+      updateTransposedFrequencies();
+      updateSolfegeColors();
+    };
+    document.getElementById("key-right").onclick = () => {
+      currentKeyIndex = (currentKeyIndex + 1) % keyNames.length;
+      document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
+      updateTransposedFrequencies();
+      updateSolfegeColors();
+    };
+    document.getElementById("left-arrow").onclick = () => {
+      currentWaveformIndex = (currentWaveformIndex - 1 + waveforms.length) % waveforms.length;
+      currentWaveform = waveforms[currentWaveformIndex];
+      document.getElementById("waveform-name").textContent = currentWaveform;
+    };
+    document.getElementById("right-arrow").onclick = () => {
+      currentWaveformIndex = (currentWaveformIndex + 1) % waveforms.length;
+      currentWaveform = waveforms[currentWaveformIndex];
+      document.getElementById("waveform-name").textContent = currentWaveform;
+    };
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeValue = document.getElementById('volume-value');
+    volumeSlider.value = globalVolume;
+    volumeValue.textContent = `${Math.round(globalVolume * 100)}%`;
+    volumeSlider.addEventListener('input', () => {
+      globalVolume = parseFloat(volumeSlider.value);
+      volumeValue.textContent = `${Math.round(globalVolume * 100)}%`;
+    });
+    let controlMode = null;
+    function selectControl(which) {
+      controlMode = which;
+      keyButton.classList.toggle('selected', which === 'key');
+      waveButton.classList.toggle('selected', which === 'waveform');
+      volumeControl.style.boxShadow = which === 'volume' ? '0 0 0 0.5vmin #007aff88' : 'none';
+      if (which === 'key') keyButton.focus();
+      if (which === 'waveform') waveButton.focus();
+      if (which === 'volume') volumeControl.focus();
     }
-
-    window.addEventListener('resize', handleAccordionDisplay);
-    window.addEventListener('DOMContentLoaded', handleAccordionDisplay);
-
-    // --- The rest of your JS (button logic, grid, etc.) is unchanged and works as before ---
+    keyButton.onclick = () => selectControl('key');
+    keyButton.onfocus = () => selectControl('key');
+    waveButton.onclick = () => selectControl('waveform');
+    waveButton.onfocus = () => selectControl('waveform');
+    volumeControl.onclick = () => selectControl('volume');
+    volumeControl.onfocus = () => selectControl('volume');
+    keyButton.onblur = () => keyButton.classList.remove('selected');
+    waveButton.onblur = () => waveButton.classList.remove('selected');
     buttons.forEach(btn => {
       const div = document.createElement('div');
       div.className = 'note-button';

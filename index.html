@@ -9,6 +9,8 @@
 <body>
   <div id="app-wrapper">
     <div class="controls-bar" id="controls-bar"></div>
+    <!-- Accordion content for note buttons -->
+    <div class="accordion-content" id="accordion-content"></div>
     <div class="main-content">
       <div class="proportional-grid-wrapper">
         <div class="grid" id="grid"></div>
@@ -217,6 +219,7 @@
       { name: 'Re', key: '2', note: 'D5', cells: ['1c'] },
       { name: 'Mi', key: '3', note: 'E5', cells: ['1d'] }
     ];
+
     const grid = document.getElementById('grid');
     const keyToDiv = {};
 
@@ -294,6 +297,25 @@
     cellRefs['7d'].addEventListener('touchcancel', function(e) { setFlatTouchHeld(false); });
 
     const controlsBar = document.getElementById('controls-bar');
+
+    // --- Accordion Toggle Setup ---
+    const accordionToggle = document.createElement('button');
+    accordionToggle.className = 'accordion-toggle';
+    accordionToggle.setAttribute('aria-expanded', 'false');
+    accordionToggle.innerHTML = '<span>Show Notes</span> <span class="arrow">&#9654;</span>';
+    controlsBar.appendChild(accordionToggle);
+
+    const accordionContent = document.getElementById('accordion-content');
+    let accordionOpen = false;
+    accordionToggle.onclick = () => {
+      accordionOpen = !accordionOpen;
+      accordionToggle.setAttribute('aria-expanded', accordionOpen);
+      accordionContent.classList.toggle('open', accordionOpen);
+      accordionToggle.classList.toggle('open', accordionOpen);
+      accordionToggle.querySelector('span').textContent = accordionOpen ? 'Hide Notes' : 'Show Notes';
+    };
+
+    // --- Rest of controls ---
     const keyButton = document.createElement('div');
     keyButton.className = 'control-area';
     keyButton.tabIndex = 0;
@@ -336,6 +358,7 @@
     controlsBar.appendChild(keyButton);
     controlsBar.appendChild(waveButton);
     controlsBar.appendChild(volumeControl);
+
     document.getElementById("key-left").onclick = () => {
       currentKeyIndex = (currentKeyIndex - 1 + keyNames.length) % keyNames.length;
       document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
@@ -384,6 +407,8 @@
     volumeControl.onfocus = () => selectControl('volume');
     keyButton.onblur = () => keyButton.classList.remove('selected');
     waveButton.onblur = () => waveButton.classList.remove('selected');
+
+    // --- NOTE BUTTONS now go in ACCORDION CONTENT ---
     buttons.forEach(btn => {
       const div = document.createElement('div');
       div.className = 'note-button';
@@ -391,16 +416,8 @@
       div.style.outline = 'none';
       const color = noteColorsByKey[keyNames[currentKeyIndex]][btn.name] || '#ccc';
       div.style.backgroundColor = color;
-      const rows = [...new Set(btn.cells.map(c => positions[c][0]))];
-      const cols = [...new Set(btn.cells.map(c => positions[c][1]))];
-      const top = Math.min(...rows) * (100 / 11);
-      const left = Math.min(...cols) * (100 / 4);
-      const height = rows.length * (100 / 11) - 0.5;
-      const width = cols.length * (100 / 4) - 0.5;
-      div.style.top = `${top}%`;
-      div.style.left = `${left}%`;
-      div.style.height = `${height}%`;
-      div.style.width = `${width}%`;
+      // Remove absolute positioning for accordion layout
+      // (If you want grid style, you can style this via CSS .accordion-content .note-button)
       let isTouching = false;
       div.addEventListener('mousedown', (e) => {
         e.preventDefault();
@@ -436,7 +453,7 @@
         handleStopKey(btn.key);
         div.classList.remove('active');
       });
-      grid.appendChild(div);
+      accordionContent.appendChild(div);
       keyToDiv[btn.key] = div;
     });
 
@@ -518,7 +535,8 @@
       gridEl.style.marginTop = "0";
       gridEl.style.marginBottom = "0";
       const fontSize = Math.min(gridHeight / 11, gridWidth / 4) * 0.5;
-      gridEl.querySelectorAll('.note-button').forEach(div=>{
+      // note-button font size in grid is not used anymore, but you might want to size accordion note-buttons too
+      accordionContent.querySelectorAll('.note-button').forEach(div=>{
         div.style.fontSize = fontSize + 'px';
       });
       gridEl.querySelectorAll('.cell').forEach(div=>{

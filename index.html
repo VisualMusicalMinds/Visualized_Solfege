@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Solfege Tower</title>
+  <title>Solfege Tower (with Note/S Toggle and Letter Names for All Keys)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -32,7 +32,7 @@
     };
     let noteFrequencies = { ...baseFrequencies };
 
-    const semitoneShiftMap = {'C':0,'Db':1,'D':2,'Eb':3,'E':4,'F':5,'Gb':6,'G':7,'Ab':-4,'A':-3,'Bb':-2,'B':-1};
+    const semitoneShiftMap = {'C':0,'Db':1,'D':2,'Eb':3,'E':4,'F':5,'Gb':6,'G':-5,'Ab':-4,'A':-3,'Bb':-2,'B':-1};
     function transposeFrequency(freq, semitoneShift) {
       return freq * Math.pow(2, semitoneShift / 12);
     }
@@ -57,6 +57,42 @@
       'A': { 'Do': '#007AFF', 'Re': '#AF52DE', 'Mi': '#FF3B30', 'Fa': '#FF9500', 'So': '#FFCC00', 'La': '#34C759', 'Ti': '#5af5fa' },
       'Bb': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' },
       'B': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' }
+    };
+
+    // --- Toggle State and Names ---
+    let cButtonState = 'note'; // can be 'note' or 'S'
+
+    // Map for alternative names for all keys (letters)
+    const letterNamesByKey = {
+      'C':  { 'Do': 'C',  'Re': 'D',  'Mi': 'E',  'Fa': 'F',  'So': 'G',  'La': 'A',  'Ti': 'B' },
+      'Db': { 'Do': 'Db', 'Re': 'Eb', 'Mi': 'F',  'Fa': 'Gb', 'So': 'Ab', 'La': 'Bb', 'Ti': 'C' },
+      'D':  { 'Do': 'D',  'Re': 'E',  'Mi': 'F#', 'Fa': 'G',  'So': 'A',  'La': 'B',  'Ti': 'C#' },
+      'Eb': { 'Do': 'Eb', 'Re': 'F',  'Mi': 'G',  'Fa': 'Ab', 'So': 'Bb', 'La': 'C',  'Ti': 'D' },
+      'E':  { 'Do': 'E',  'Re': 'F#', 'Mi': 'G#', 'Fa': 'A',  'So': 'B',  'La': 'C#', 'Ti': 'D#' },
+      'F':  { 'Do': 'F',  'Re': 'G',  'Mi': 'A',  'Fa': 'Bb', 'So': 'C',  'La': 'D',  'Ti': 'E' },
+      'Gb': { 'Do': 'Gb', 'Re': 'Ab', 'Mi': 'Bb', 'Fa': 'Cb', 'So': 'Db', 'La': 'Eb', 'Ti': 'F' },
+      'G':  { 'Do': 'G',  'Re': 'A',  'Mi': 'B',  'Fa': 'C',  'So': 'D',  'La': 'E',  'Ti': 'F#' },
+      'Ab': { 'Do': 'Ab', 'Re': 'Bb', 'Mi': 'C',  'Fa': 'Db', 'So': 'Eb', 'La': 'F',  'Ti': 'G' },
+      'A':  { 'Do': 'A',  'Re': 'B',  'Mi': 'C#', 'Fa': 'D',  'So': 'E',  'La': 'F#', 'Ti': 'G#' },
+      'Bb': { 'Do': 'Bb', 'Re': 'C',  'Mi': 'D',  'Fa': 'Eb', 'So': 'F',  'La': 'G',  'Ti': 'A' },
+      'B':  { 'Do': 'B',  'Re': 'C#', 'Mi': 'D#', 'Fa': 'E',  'So': 'F#', 'La': 'G#', 'Ti': 'A#' }
+    };
+
+    // Map for standard solfege names
+    const buttonSolfegeNames = {
+      'f': 'Fa',
+      'q': 'So',
+      'd': 'Mi',
+      's': 'Re',
+      'a': 'Do',
+      'x': 'La',
+      'c': 'Ti',
+      'z': 'So',
+      'w': 'La',
+      'e': 'Ti',
+      '1': 'Do',
+      '2': 'Re',
+      '3': 'Mi'
     };
 
     const harmonics = 20;
@@ -220,33 +256,7 @@
     const grid = document.getElementById('grid');
     const keyToDiv = {};
 
-    function updateSolfegeColors() {
-      const currentKey = keyNames[currentKeyIndex];
-      const bgColors = noteColorsByKey[currentKey];
-      const textColorsByKey = {
-        'C':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-        'Db':  { 'Do': '#0c027a', 'Re': '#0c027a', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#0c027a', 'Ti': '#FFFFFF' },
-        'D':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#820101' },
-        'Eb':  { 'Do': '#0c027a', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-        'E':   { 'Do': '#FFFFFF', 'Re': '#820101', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#820101', 'Ti': '#820101' },
-        'F':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-        'Gb':  { 'Do': '#0c027a', 'Re': '#0c027a', 'Mi': '#0c027a', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#0c027a', 'Ti': '#FFFFFF' },
-        'G':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#820101' },
-        'Ab':  { 'Do': '#0c027a', 'Re': '#0c027a', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#0c027a', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-        'A':   { 'Do': '#FFFFFF', 'Re': '#FFFFFF', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#FFFFFF', 'La': '#820101', 'Ti': '#820101' },
-        'Bb':  { 'Do': '#0c027a', 'Re': '#FFFFFF', 'Mi': '#FFFFFF', 'Fa': '#0c027a', 'So': '#FFFFFF', 'La': '#FFFFFF', 'Ti': '#FFFFFF' },
-        'B':   { 'Do': '#FFFFFF', 'Re': '#820101', 'Mi': '#820101', 'Fa': '#FFFFFF', 'So': '#820101', 'La': '#820101', 'Ti': '#820101' }
-      };
-      const textColors = textColorsByKey[currentKey];
-      buttons.forEach(btn => {
-        const div = keyToDiv[btn.key];
-        if (div) {
-          if (bgColors[btn.name]) div.style.backgroundColor = bgColors[btn.name];
-          if (textColors[btn.name]) div.style.color = textColors[btn.name];
-        }
-      });
-    }
-
+    // --- Note/S Toggle Button rendering in cell 5d ---
     const cellRefs = {};
     for (let r = 0; r < 11; r++) {
       for (let c = 0; c < 4; c++) {
@@ -263,36 +273,99 @@
       }
     }
 
-    cellRefs['6d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppSharpSign3.png" alt="Sharp">';
-    cellRefs['7d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppFlatSign3.png" alt="Flat">';
+    // Render the Note/S toggle button in cell 5d
+    function renderToggleButton() {
+      const el = document.createElement('button');
+      el.className = 'chord-toggle-btn';
+      el.setAttribute('type', 'button');
+      el.setAttribute('aria-pressed', cButtonState === 'S');
+      el.style.fontFamily = "inherit";
+      el.style.fontWeight = "bold";
+      el.style.fontSize = "2em";
+      el.style.background = "transparent";
+      el.style.border = "none";
+      el.style.color = "#222";
+      el.style.width = "100%";
+      el.style.height = "100%";
+      el.style.cursor = "pointer";
+      el.style.display = "flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      if (cButtonState === 'note') {
+        el.innerHTML = '<span style="font-size:1.5em;line-height:1;">&#119070;</span>';
+      } else {
+        el.innerText = 'S';
+      }
+      el.addEventListener('click', () => {
+        cButtonState = (cButtonState === 'note') ? 'S' : 'note';
+        renderToggleButton();
+        updateBoxNames();
+      });
+      el.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          cButtonState = (cButtonState === 'note') ? 'S' : 'note';
+          renderToggleButton();
+          updateBoxNames();
+        }
+      });
+      cellRefs['5d'].innerHTML = '';
+      cellRefs['5d'].appendChild(el);
+    }
+    cellRefs['5d'].style.border = "2px solid #ddd";
+    renderToggleButton();
+
+    // Add sharp and flat buttons in same places as before
+    cellRefs['7d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppSharpSign3.png" alt="Sharp">';
+    cellRefs['8d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppFlatSign3.png" alt="Flat">';
 
     function setSharpTouchHeld(val) {
       sharpTouchHeld = val;
-      if (val) cellRefs['6d'].classList.add('active');
-      else cellRefs['6d'].classList.remove('active');
-      reTriggerHeldKeysAccidentals();
-    }
-    function setFlatTouchHeld(val) {
-      flatTouchHeld = val;
       if (val) cellRefs['7d'].classList.add('active');
       else cellRefs['7d'].classList.remove('active');
       reTriggerHeldKeysAccidentals();
     }
+    function setFlatTouchHeld(val) {
+      flatTouchHeld = val;
+      if (val) cellRefs['8d'].classList.add('active');
+      else cellRefs['8d'].classList.remove('active');
+      reTriggerHeldKeysAccidentals();
+    }
 
-    cellRefs['6d'].addEventListener('touchstart', function(e) { e.preventDefault(); setSharpTouchHeld(true); });
-    cellRefs['6d'].addEventListener('mousedown', function(e) { e.preventDefault(); setSharpTouchHeld(true); });
-    cellRefs['6d'].addEventListener('touchend', function(e) { setSharpTouchHeld(false); });
-    cellRefs['6d'].addEventListener('mouseup', function(e) { setSharpTouchHeld(false); });
-    cellRefs['6d'].addEventListener('mouseleave', function(e) { setSharpTouchHeld(false); });
-    cellRefs['6d'].addEventListener('touchcancel', function(e) { setSharpTouchHeld(false); });
+    cellRefs['7d'].addEventListener('touchstart', function(e) { e.preventDefault(); setSharpTouchHeld(true); });
+    cellRefs['7d'].addEventListener('mousedown', function(e) { e.preventDefault(); setSharpTouchHeld(true); });
+    cellRefs['7d'].addEventListener('touchend', function(e) { setSharpTouchHeld(false); });
+    cellRefs['7d'].addEventListener('mouseup', function(e) { setSharpTouchHeld(false); });
+    cellRefs['7d'].addEventListener('mouseleave', function(e) { setSharpTouchHeld(false); });
+    cellRefs['7d'].addEventListener('touchcancel', function(e) { setSharpTouchHeld(false); });
 
-    cellRefs['7d'].addEventListener('touchstart', function(e) { e.preventDefault(); setFlatTouchHeld(true); });
-    cellRefs['7d'].addEventListener('mousedown', function(e) { e.preventDefault(); setFlatTouchHeld(true); });
-    cellRefs['7d'].addEventListener('touchend', function(e) { setFlatTouchHeld(false); });
-    cellRefs['7d'].addEventListener('mouseup', function(e) { setFlatTouchHeld(false); });
-    cellRefs['7d'].addEventListener('mouseleave', function(e) { setFlatTouchHeld(false); });
-    cellRefs['7d'].addEventListener('touchcancel', function(e) { setFlatTouchHeld(false); });
+    cellRefs['8d'].addEventListener('touchstart', function(e) { e.preventDefault(); setFlatTouchHeld(true); });
+    cellRefs['8d'].addEventListener('mousedown', function(e) { e.preventDefault(); setFlatTouchHeld(true); });
+    cellRefs['8d'].addEventListener('touchend', function(e) { setFlatTouchHeld(false); });
+    cellRefs['8d'].addEventListener('mouseup', function(e) { setFlatTouchHeld(false); });
+    cellRefs['8d'].addEventListener('mouseleave', function(e) { setFlatTouchHeld(false); });
+    cellRefs['8d'].addEventListener('touchcancel', function(e) { setFlatTouchHeld(false); });
 
+    // --- Box name update logic ---
+    // Reference for updating (key -> div)
+    const noteButtonRefs = {};
+
+    function updateBoxNames() {
+      // If "note" state, show solfege. If "S" state, show letter names for the current key.
+      const currentKey = keyNames[currentKeyIndex];
+      for (const btn of buttons) {
+        const div = noteButtonRefs[btn.key];
+        if (!div) continue;
+        if (cButtonState === 'note') {
+          div.textContent = buttonSolfegeNames[btn.key] || btn.name;
+        } else {
+          const solfege = buttonSolfegeNames[btn.key] || btn.name;
+          div.textContent = (letterNamesByKey[currentKey] && letterNamesByKey[currentKey][solfege]) ? letterNamesByKey[currentKey][solfege] : solfege;
+        }
+      }
+    }
+
+    // --- CONTROLS BAR (unchanged) ---
     const controlsBar = document.getElementById('controls-bar');
     const keyButton = document.createElement('div');
     keyButton.className = 'control-area';
@@ -341,12 +414,14 @@
       document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
       updateTransposedFrequencies();
       updateSolfegeColors();
+      updateBoxNames();
     };
     document.getElementById("key-right").onclick = () => {
       currentKeyIndex = (currentKeyIndex + 1) % keyNames.length;
       document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
       updateTransposedFrequencies();
       updateSolfegeColors();
+      updateBoxNames();
     };
     document.getElementById("left-arrow").onclick = () => {
       currentWaveformIndex = (currentWaveformIndex - 1 + waveforms.length) % waveforms.length;
@@ -384,6 +459,8 @@
     volumeControl.onfocus = () => selectControl('volume');
     keyButton.onblur = () => keyButton.classList.remove('selected');
     waveButton.onblur = () => waveButton.classList.remove('selected');
+
+    // --- BUTTONS RENDERING ---
     buttons.forEach(btn => {
       const div = document.createElement('div');
       div.className = 'note-button';
@@ -438,18 +515,32 @@
       });
       grid.appendChild(div);
       keyToDiv[btn.key] = div;
+      noteButtonRefs[btn.key] = div;
     });
 
+    // --- Update box names on toggle ---
+    function updateSolfegeColors() {
+      const currentKey = keyNames[currentKeyIndex];
+      const bgColors = noteColorsByKey[currentKey];
+      buttons.forEach(btn => {
+        const div = keyToDiv[btn.key];
+        if (div) {
+          if (bgColors[btn.name]) div.style.backgroundColor = bgColors[btn.name];
+        }
+      });
+    }
+
+    // --- Handle keyboard ---
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       let accidentalChanged = false;
       if (e.key === '=') {
         accidentalHeld.sharp = true; accidentalChanged = true;
-        cellRefs['6d'].classList.add('active');
+        cellRefs['7d'].classList.add('active');
       }
       if (e.key === '-') {
         accidentalHeld.flat = true; accidentalChanged = true;
-        cellRefs['7d'].classList.add('active');
+        cellRefs['8d'].classList.add('active');
       }
       if (document.activeElement === keyButton && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
         if (e.key === 'ArrowLeft') document.getElementById('key-left').click();
@@ -481,11 +572,11 @@
       let accidentalChanged = false;
       if (e.key === '=') {
         accidentalHeld.sharp = false; accidentalChanged = true;
-        cellRefs['6d'].classList.remove('active');
+        cellRefs['7d'].classList.remove('active');
       }
       if (e.key === '-') {
         accidentalHeld.flat = false; accidentalChanged = true;
-        cellRefs['7d'].classList.remove('active');
+        cellRefs['8d'].classList.remove('active');
       }
       if (heldKeys.has(e.key)) {
         heldKeys.delete(e.key);
@@ -497,6 +588,7 @@
       }
     });
 
+    // --- Resize logic ---
     function resizeGrid() {
       const gridEl = document.getElementById('grid');
       const gridWrapper = document.querySelector('.proportional-grid-wrapper');
@@ -524,12 +616,19 @@
       gridEl.querySelectorAll('.cell').forEach(div=>{
         div.style.fontSize = fontSize + 'px';
       });
+      // Also resize the Note/S button if it exists
+      const toggleBtn = cellRefs['5d'].querySelector('.chord-toggle-btn');
+      if (toggleBtn) toggleBtn.style.fontSize = Math.max(fontSize * 1.1, 20) + 'px';
     }
     window.addEventListener('resize', resizeGrid);
-    window.addEventListener('DOMContentLoaded', () => setTimeout(resizeGrid, 1));
-    setTimeout(resizeGrid, 200);
+    window.addEventListener('DOMContentLoaded', () => { setTimeout(() => { resizeGrid(); updateSolfegeColors(); updateBoxNames(); }, 1); });
+    setTimeout(() => { resizeGrid(); updateSolfegeColors(); updateBoxNames(); }, 200);
     const mq = window.matchMedia("(max-width: 550px)");
-    mq.addEventListener("change", resizeGrid);
+    mq.addEventListener("change", () => { resizeGrid(); updateSolfegeColors(); updateBoxNames(); });
+
+    // Initial update
+    updateSolfegeColors();
+    updateBoxNames();
   </script>
 </body>
 </html>

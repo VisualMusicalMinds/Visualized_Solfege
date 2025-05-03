@@ -5,6 +5,31 @@
   <title>Solfege Tower (with Note/S Toggle and Letter Names for All Keys)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .chord-toggle-btn {
+      padding: 0;
+      margin: 0;
+      background: transparent;
+      border: none;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.2em, 6vw, 2em);
+      line-height: 1;
+      overflow: hidden;
+    }
+    .chord-toggle-btn .music-symbol {
+      font-size: 1em;
+      line-height: 1;
+      vertical-align: middle;
+      display: inline-block;
+      max-width: 100%;
+      max-height: 100%;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <div id="app-wrapper">
@@ -59,10 +84,8 @@
       'B': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' }
     };
 
-    // --- Toggle State and Names ---
     let cButtonState = 'note'; // can be 'note' or 'S'
 
-    // Map for alternative names for all keys (letters)
     const letterNamesByKey = {
       'C':  { 'Do': 'C',  'Re': 'D',  'Mi': 'E',  'Fa': 'F',  'So': 'G',  'La': 'A',  'Ti': 'B' },
       'Db': { 'Do': 'Db', 'Re': 'Eb', 'Mi': 'F',  'Fa': 'Gb', 'So': 'Ab', 'La': 'Bb', 'Ti': 'C' },
@@ -78,7 +101,6 @@
       'B':  { 'Do': 'B',  'Re': 'C#', 'Mi': 'D#', 'Fa': 'E',  'So': 'F#', 'La': 'G#', 'Ti': 'A#' }
     };
 
-    // Map for standard solfege names
     const buttonSolfegeNames = {
       'f': 'Fa',
       'q': 'So',
@@ -255,8 +277,6 @@
     ];
     const grid = document.getElementById('grid');
     const keyToDiv = {};
-
-    // --- Note/S Toggle Button rendering in cell 5d ---
     const cellRefs = {};
     for (let r = 0; r < 11; r++) {
       for (let c = 0; c < 4; c++) {
@@ -279,20 +299,8 @@
       el.className = 'chord-toggle-btn';
       el.setAttribute('type', 'button');
       el.setAttribute('aria-pressed', cButtonState === 'S');
-      el.style.fontFamily = "inherit";
-      el.style.fontWeight = "bold";
-      el.style.fontSize = "2em";
-      el.style.background = "transparent";
-      el.style.border = "none";
-      el.style.color = "#222";
-      el.style.width = "100%";
-      el.style.height = "100%";
-      el.style.cursor = "pointer";
-      el.style.display = "flex";
-      el.style.alignItems = "center";
-      el.style.justifyContent = "center";
       if (cButtonState === 'note') {
-        el.innerHTML = '<span style="font-size:1.5em;line-height:1;">&#119070;</span>';
+        el.innerHTML = '<span class="music-symbol">&#9835;</span>';
       } else {
         el.innerText = 'S';
       }
@@ -315,7 +323,7 @@
     cellRefs['5d'].style.border = "2px solid #ddd";
     renderToggleButton();
 
-    // Add sharp and flat buttons in same places as before
+    // Add sharp and flat buttons in 7d/8d
     cellRefs['7d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppSharpSign3.png" alt="Sharp">';
     cellRefs['8d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppFlatSign3.png" alt="Flat">';
 
@@ -347,11 +355,9 @@
     cellRefs['8d'].addEventListener('touchcancel', function(e) { setFlatTouchHeld(false); });
 
     // --- Box name update logic ---
-    // Reference for updating (key -> div)
     const noteButtonRefs = {};
 
     function updateBoxNames() {
-      // If "note" state, show solfege. If "S" state, show letter names for the current key.
       const currentKey = keyNames[currentKeyIndex];
       for (const btn of buttons) {
         const div = noteButtonRefs[btn.key];
@@ -365,7 +371,7 @@
       }
     }
 
-    // --- CONTROLS BAR (unchanged) ---
+    // --- CONTROLS BAR ---
     const controlsBar = document.getElementById('controls-bar');
     const keyButton = document.createElement('div');
     keyButton.className = 'control-area';

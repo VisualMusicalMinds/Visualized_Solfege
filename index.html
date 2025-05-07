@@ -43,6 +43,19 @@
   <script>
     // --- AUDIO & STATE ---
     const context = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Add compressor to prevent pops and clicks
+    const compressor = context.createDynamicsCompressor();
+    compressor.threshold.value = -24;
+    compressor.knee.value = 30;
+    compressor.ratio.value = 12;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.25;
+    compressor.connect(context.destination);
+    
+    // Add touch tolerance variable
+    let touchLeaveTimeout = null;
+    
     const waveforms = ['sine', 'triangle', 'square', 'sawtooth', 'voice'];
     let currentWaveformIndex = 1;
     let currentWaveform = waveforms[currentWaveformIndex];
@@ -146,50 +159,71 @@
 
     function startNote(key, freq) {
       stopNote(key);
+      
+      const now = context.currentTime;
       let osc, gain, lfo, lfoGain, filter;
+      
       gain = context.createGain();
+      // Set initial gain to 0 to prevent popping
+      gain.gain.setValueAtTime(0, now);
+      
       if (currentWaveform === "voice") {
         osc = context.createOscillator();
         osc.setPeriodicWave(customVoiceWave);
         osc.frequency.value = freq;
+        
         lfo = context.createOscillator();
         lfoGain = context.createGain();
-        lfo.frequency.setValueAtTime(1.5, context.currentTime);
-        lfo.frequency.linearRampToValueAtTime(5, context.currentTime + 1);
-        lfoGain.gain.setValueAtTime(2.0, context.currentTime);
+        lfo.frequency.setValueAtTime(1.5, now);
+        lfo.frequency.linearRampToValueAtTime(5, now + 1);
+        lfoGain.gain.setValueAtTime(2.0, now);
         lfo.connect(lfoGain);
         lfoGain.connect(osc.frequency);
         lfo.start();
+        
         filter = context.createBiquadFilter();
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1200, context.currentTime);
+        filter.frequency.setValueAtTime(1200, now);
         filter.Q.value = 1;
+        
         osc.connect(filter);
         filter.connect(gain);
-        const now = context.currentTime;
+        
         const attackTime = 0.08;
         const decayTime = 0.18;
         const sustainLevel = globalVolume * 0.5;
         const maxLevel = globalVolume * 0.85;
-        gain.gain.setValueAtTime(0, now);
+        
+        // Attack and decay
         gain.gain.linearRampToValueAtTime(maxLevel, now + attackTime);
         gain.gain.linearRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
-        gain.connect(context.destination);
+        
+        gain.connect(compressor); // Connect to compressor instead of destination
         osc.start();
+        
         activeOscillators[key] = { osc, gain, lfo, lfoGain, filter };
       } else {
         osc = context.createOscillator();
         osc.type = currentWaveform;
         osc.frequency.value = freq;
+        
         filter = context.createBiquadFilter();
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1200, context.currentTime);
+        filter.frequency.setValueAtTime(1200, now);
         filter.Q.value = 1;
+        
         osc.connect(filter);
         filter.connect(gain);
-        gain.connect(context.destination);
-        gain.gain.setValueAtTime(globalVolume, context.currentTime);
+        
+        // Add a short attack phase to prevent popping
+        const attackTime = 0.015; // 15ms attack time
+        
+        // Attack phase - linearly ramp from 0 to target volume
+        gain.gain.linearRampToValueAtTime(globalVolume, now + attackTime);
+        
+        gain.connect(compressor); // Connect to compressor instead of destination
         osc.start();
+        
         activeOscillators[key] = { osc, gain, filter };
       }
     }
@@ -197,23 +231,30 @@
     function stopNote(key) {
       const active = activeOscillators[key];
       if (!active) return;
+      
       const now = context.currentTime;
-      if (currentWaveform === "voice") {
-        active.gain.gain.cancelScheduledValues(now);
-        active.gain.gain.setValueAtTime(active.gain.gain.value, now);
-        const releaseTime = 0.6;
-        const stopBuffer = 0.1;
-        active.gain.gain.linearRampToValueAtTime(0.0001, now + releaseTime);
-        active.osc.stop(now + releaseTime + stopBuffer);
-        if (active.lfo) active.lfo.stop(now + releaseTime + stopBuffer);
-      } else {
-        active.gain.gain.cancelScheduledValues(now);
-        active.gain.gain.setValueAtTime(active.gain.gain.value, now);
-        const releaseTime = 1.2;
-        const stopBuffer = 0.1;
-        active.gain.gain.exponentialRampToValueAtTime(0.001, now + releaseTime);
-        active.osc.stop(now + releaseTime + stopBuffer);
+      
+      if (active.osc) {
+        const gain = active.gain;
+        
+        if (currentWaveform === "voice") {
+          gain.gain.cancelScheduledValues(now);
+          gain.gain.setValueAtTime(gain.gain.value, now);
+          const releaseTime = 0.6;
+          const stopBuffer = 0.1;
+          gain.gain.linearRampToValueAtTime(0.0001, now + releaseTime);
+          active.osc.stop(now + releaseTime + stopBuffer);
+          if (active.lfo) active.lfo.stop(now + releaseTime + stopBuffer);
+        } else {
+          gain.gain.cancelScheduledValues(now);
+          gain.gain.setValueAtTime(gain.gain.value, now);
+          const releaseTime = 0.2; // Shorter release time for better responsiveness
+          const stopBuffer = 0.1;
+          gain.gain.exponentialRampToValueAtTime(0.001, now + releaseTime);
+          active.osc.stop(now + releaseTime + stopBuffer);
+        }
       }
+      
       delete activeOscillators[key];
     }
 
@@ -510,14 +551,23 @@
         window.focus();
       });
       div.addEventListener('touchend', () => {
-        isTouching = false;
-        handleStopKey(btn.key);
-        div.classList.remove('active');
+        // Add touch tolerance to prevent rapid on/off toggling at edges
+        if (touchLeaveTimeout) clearTimeout(touchLeaveTimeout);
+        touchLeaveTimeout = setTimeout(() => {
+          isTouching = false;
+          handleStopKey(btn.key);
+          div.classList.remove('active');
+          touchLeaveTimeout = null;
+        }, 20); // 20ms delay before stopping sound
       });
       div.addEventListener('touchcancel', () => {
-        isTouching = false;
-        handleStopKey(btn.key);
-        div.classList.remove('active');
+        if (touchLeaveTimeout) clearTimeout(touchLeaveTimeout);
+        touchLeaveTimeout = setTimeout(() => {
+          isTouching = false;
+          handleStopKey(btn.key);
+          div.classList.remove('active');
+          touchLeaveTimeout = null;
+        }, 20);
       });
       grid.appendChild(div);
       keyToDiv[btn.key] = div;

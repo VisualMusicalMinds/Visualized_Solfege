@@ -53,8 +53,8 @@
     compressor.release.value = 0.25;
     compressor.connect(context.destination);
     
-    // Add touch tolerance variable
-    let touchLeaveTimeout = null;
+    // Track active touches by identifier
+    const activeTouches = new Map();
     
     const waveforms = ['sine', 'triangle', 'square', 'sawtooth', 'voice'];
     let currentWaveformIndex = 1;
@@ -381,19 +381,37 @@
       reTriggerHeldKeysAccidentals();
     }
 
-    cellRefs['7d'].addEventListener('touchstart', function(e) { e.preventDefault(); setSharpTouchHeld(true); });
-    cellRefs['7d'].addEventListener('mousedown', function(e) { e.preventDefault(); setSharpTouchHeld(true); });
-    cellRefs['7d'].addEventListener('touchend', function(e) { setSharpTouchHeld(false); });
-    cellRefs['7d'].addEventListener('mouseup', function(e) { setSharpTouchHeld(false); });
-    cellRefs['7d'].addEventListener('mouseleave', function(e) { setSharpTouchHeld(false); });
-    cellRefs['7d'].addEventListener('touchcancel', function(e) { setSharpTouchHeld(false); });
-
-    cellRefs['8d'].addEventListener('touchstart', function(e) { e.preventDefault(); setFlatTouchHeld(true); });
-    cellRefs['8d'].addEventListener('mousedown', function(e) { e.preventDefault(); setFlatTouchHeld(true); });
-    cellRefs['8d'].addEventListener('touchend', function(e) { setFlatTouchHeld(false); });
-    cellRefs['8d'].addEventListener('mouseup', function(e) { setFlatTouchHeld(false); });
-    cellRefs['8d'].addEventListener('mouseleave', function(e) { setFlatTouchHeld(false); });
-    cellRefs['8d'].addEventListener('touchcancel', function(e) { setFlatTouchHeld(false); });
+    // Improved Sharp/Flat touch handlers
+    const sharpCell = cellRefs['7d'];
+    const flatCell = cellRefs['8d'];
+    
+    sharpCell.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        activeTouches.set(touch.identifier, { type: 'sharp', element: sharpCell });
+      }
+      setSharpTouchHeld(true);
+    });
+    
+    flatCell.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        activeTouches.set(touch.identifier, { type: 'flat', element: flatCell });
+      }
+      setFlatTouchHeld(true);
+    });
+    
+    sharpCell.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      setSharpTouchHeld(true);
+    });
+    
+    flatCell.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      setFlatTouchHeld(true);
+    });
 
     // --- Box name update logic ---
     const noteButtonRefs = {};
@@ -513,6 +531,7 @@
       div.className = 'note-button';
       div.textContent = btn.name;
       div.style.outline = 'none';
+      div.setAttribute('data-key', btn.key);
       const color = noteColorsByKey[keyNames[currentKeyIndex]][btn.name] || '#ccc';
       div.style.backgroundColor = color;
       const rows = [...new Set(btn.cells.map(c => positions[c][0]))];
@@ -525,53 +544,84 @@
       div.style.left = `${left}%`;
       div.style.height = `${height}%`;
       div.style.width = `${width}%`;
-      let isTouching = false;
+      
+      // Mouse events
       div.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        isTouching = true;
         handlePlayKey(btn.key);
         div.classList.add('active');
         window.focus();
       });
       div.addEventListener('mouseup', () => {
-        isTouching = false;
         handleStopKey(btn.key);
         div.classList.remove('active');
       });
       div.addEventListener('mouseleave', () => {
-        isTouching = false;
         handleStopKey(btn.key);
         div.classList.remove('active');
       });
+      
+      // Improved touch handling
       div.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        isTouching = true;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          activeTouches.set(touch.identifier, { key: btn.key, element: div });
+        }
         handlePlayKey(btn.key);
         div.classList.add('active');
         window.focus();
       });
-      div.addEventListener('touchend', () => {
-        // Add touch tolerance to prevent rapid on/off toggling at edges
-        if (touchLeaveTimeout) clearTimeout(touchLeaveTimeout);
-        touchLeaveTimeout = setTimeout(() => {
-          isTouching = false;
-          handleStopKey(btn.key);
-          div.classList.remove('active');
-          touchLeaveTimeout = null;
-        }, 20); // 20ms delay before stopping sound
-      });
-      div.addEventListener('touchcancel', () => {
-        if (touchLeaveTimeout) clearTimeout(touchLeaveTimeout);
-        touchLeaveTimeout = setTimeout(() => {
-          isTouching = false;
-          handleStopKey(btn.key);
-          div.classList.remove('active');
-          touchLeaveTimeout = null;
-        }, 20);
-      });
+      
       grid.appendChild(div);
       keyToDiv[btn.key] = div;
       noteButtonRefs[btn.key] = div;
+    });
+
+    // Global touch event handlers
+    document.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener('touchcancel', handleTouchEnd);
+    
+    function handleTouchEnd(e) {
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        const touchData = activeTouches.get(touch.identifier);
+        
+        if (touchData) {
+          if (touchData.key) {
+            handleStopKey(touchData.key);
+            if (touchData.element) {
+              touchData.element.classList.remove('active');
+            }
+          } else if (touchData.type === 'sharp') {
+            setSharpTouchHeld(false);
+          } else if (touchData.type === 'flat') {
+            setFlatTouchHeld(false);
+          }
+          
+          activeTouches.delete(touch.identifier);
+        }
+      }
+    }
+    
+    // Global mouse event handlers
+    document.addEventListener('mouseup', (e) => {
+      // Reset any mouse-held states that might get stuck
+      accidentalHeld.sharp = false;
+      accidentalHeld.flat = false;
+      cellRefs['7d'].classList.remove('active');
+      cellRefs['8d'].classList.remove('active');
+      
+      setSharpTouchHeld(false);
+      setFlatTouchHeld(false);
+      
+      // Stop any notes that might be stuck
+      for (const key of [...heldNoteKeys]) {
+        handleStopKey(key);
+        if (keyToDiv[key]) {
+          keyToDiv[key].classList.remove('active');
+        }
+      }
     });
 
     // --- Update box names on toggle ---
@@ -644,6 +694,42 @@
       }
     });
 
+    // Force note release on page visibility change
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        // Stop all notes when page is hidden
+        for (const key of [...heldNoteKeys]) {
+          handleStopKey(key);
+        }
+        heldNoteKeys.clear();
+        
+        // Reset all accidental and touch states
+        accidentalHeld.sharp = false;
+        accidentalHeld.flat = false;
+        setSharpTouchHeld(false);
+        setFlatTouchHeld(false);
+        
+        // Clear all active touches
+        activeTouches.clear();
+        
+        // Remove visual active states
+        document.querySelectorAll('.active').forEach(el => {
+          el.classList.remove('active');
+        });
+      }
+    });
+
+    // Emergency clean-up function for stuck notes
+    window.addEventListener('blur', () => {
+      // Force stop all oscillators when window loses focus
+      const activeOscKeys = Object.keys(activeOscillators);
+      if (activeOscKeys.length > 0) {
+        for (const key of activeOscKeys) {
+          stopNote(key);
+        }
+      }
+    });
+    
     // --- Resize logic ---
     function resizeGrid() {
       const gridEl = document.getElementById('grid');

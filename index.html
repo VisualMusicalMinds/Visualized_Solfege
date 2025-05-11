@@ -44,7 +44,6 @@
     // --- AUDIO & STATE ---
     const context = new (window.AudioContext || window.webkitAudioContext)();
     
-    // Add compressor to prevent pops and clicks
     const compressor = context.createDynamicsCompressor();
     compressor.threshold.value = -24;
     compressor.knee.value = 30;
@@ -53,9 +52,7 @@
     compressor.release.value = 0.25;
     compressor.connect(context.destination);
     
-    // Track active touches by identifier
     const activeTouches = new Map();
-    
     const waveforms = ['sine', 'triangle', 'square', 'sawtooth', 'voice'];
     let currentWaveformIndex = 1;
     let currentWaveform = waveforms[currentWaveformIndex];
@@ -114,6 +111,7 @@
       'B':  { 'Do': 'B',  'Re': 'C#', 'Mi': 'D#', 'Fa': 'E',  'So': 'F#', 'La': 'G#', 'Ti': 'A#' }
     };
 
+    // Use left hand solfege keys as base for names
     const buttonSolfegeNames = {
       'f': 'Fa',
       'q': 'So',
@@ -127,7 +125,21 @@
       'e': 'Ti',
       '1': 'Do',
       '2': 'Re',
-      '3': 'Mi'
+      '3': 'Mi',
+      // right hand keys
+      ';': 'Fa',
+      'm': 'So',
+      'l': 'Mi',
+      'k': 'Re',
+      'j': 'Do',
+      ',': 'La',
+      '.': 'Ti',
+      'u': 'So',
+      'i': 'La',
+      'o': 'Ti',
+      '7': 'Do',
+      '8': 'Re',
+      '9': 'Mi'
     };
 
     const harmonics = 20;
@@ -164,7 +176,6 @@
       let osc, gain, lfo, lfoGain, filter;
       
       gain = context.createGain();
-      // Set initial gain to 0 to prevent popping
       gain.gain.setValueAtTime(0, now);
       
       if (currentWaveform === "voice") {
@@ -194,11 +205,10 @@
         const sustainLevel = globalVolume * 0.5;
         const maxLevel = globalVolume * 0.85;
         
-        // Attack and decay
         gain.gain.linearRampToValueAtTime(maxLevel, now + attackTime);
         gain.gain.linearRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
         
-        gain.connect(compressor); // Connect to compressor instead of destination
+        gain.connect(compressor);
         osc.start();
         
         activeOscillators[key] = { osc, gain, lfo, lfoGain, filter };
@@ -215,13 +225,10 @@
         osc.connect(filter);
         filter.connect(gain);
         
-        // Add a short attack phase to prevent popping
-        const attackTime = 0.015; // 15ms attack time
-        
-        // Attack phase - linearly ramp from 0 to target volume
+        const attackTime = 0.015;
         gain.gain.linearRampToValueAtTime(globalVolume, now + attackTime);
         
-        gain.connect(compressor); // Connect to compressor instead of destination
+        gain.connect(compressor);
         osc.start();
         
         activeOscillators[key] = { osc, gain, filter };
@@ -248,7 +255,7 @@
         } else {
           gain.gain.cancelScheduledValues(now);
           gain.gain.setValueAtTime(gain.gain.value, now);
-          const releaseTime = 0.2; // Shorter release time for better responsiveness
+          const releaseTime = 0.2;
           const stopBuffer = 0.1;
           gain.gain.exponentialRampToValueAtTime(0.001, now + releaseTime);
           active.osc.stop(now + releaseTime + stopBuffer);
@@ -259,7 +266,7 @@
     }
 
     function handlePlayKey(key) {
-      const btn = buttons.find(b => b.key === key);
+      const btn = buttons.find(b => b.keys.includes(key));
       if (!btn) return;
       heldNoteKeys.add(key);
       const accidental = getAccidentalShift();
@@ -280,7 +287,7 @@
         stopNote(`${key}_0`);
         stopNote(`${key}_1`);
         stopNote(`${key}_-1`);
-        const btn = buttons.find(b => b.key === key);
+        const btn = buttons.find(b => b.keys.includes(key));
         if (!btn) continue;
         const accidental = getAccidentalShift();
         const oscKey = `${key}_${accidental}`;
@@ -301,21 +308,23 @@
       '1c': [0, 2], '1d': [0, 3]
     };
 
+    // Dual key binding per note
     const buttons = [
-      { name: 'Fa', key: 'f', note: 'F4', cells: ['3a','4a'] },
-      { name: 'So', key: 'q', note: 'G4', cells: ['3b','4b','3c','4c'] },
-      { name: 'Mi', key: 'd', note: 'E4', cells: ['5a'] },
-      { name: 'Re', key: 's', note: 'D4', cells: ['6a'] },
-      { name: 'Do', key: 'a', note: 'C4', cells: ['5b','6b','7b','5c','6c','7c'] },
-      { name: 'La', key: 'x', note: 'A3', cells: ['8b'] },
-      { name: 'Ti', key: 'c', note: 'B3', cells: ['8c'] },
-      { name: 'So', key: 'z', note: 'G3', cells: ['9b','9c'] },
-      { name: 'La', key: 'w', note: 'A4', cells: ['4d'] },
-      { name: 'Ti', key: 'e', note: 'B4', cells: ['3d'] },
-      { name: 'Do', key: '1', note: 'C5', cells: ['2c','2d'] },
-      { name: 'Re', key: '2', note: 'D5', cells: ['1c'] },
-      { name: 'Mi', key: '3', note: 'E5', cells: ['1d'] }
+      { name: 'Fa', keys: ['f', ';'], note: 'F4', cells: ['3a','4a'] },
+      { name: 'So', keys: ['z', 'm'], note: 'G3', cells: ['9b','9c'] }, // bottom So
+      { name: 'Mi', keys: ['d', 'l'], note: 'E4', cells: ['5a'] },
+      { name: 'Re', keys: ['s', 'k'], note: 'D4', cells: ['6a'] },
+      { name: 'Do', keys: ['a', 'j'], note: 'C4', cells: ['5b','6b','7b','5c','6c','7c'] },
+      { name: 'La', keys: ['x', ','], note: 'A3', cells: ['8b'] },
+      { name: 'Ti', keys: ['c', '.'], note: 'B3', cells: ['8c'] },
+      { name: 'So', keys: ['q', 'u'], note: 'G4', cells: ['3b','4b','3c','4c'] },
+      { name: 'La', keys: ['w', 'i'], note: 'A4', cells: ['4d'] },
+      { name: 'Ti', keys: ['e', 'o'], note: 'B4', cells: ['3d'] },
+      { name: 'Do', keys: ['1', '7'], note: 'C5', cells: ['2c','2d'] },
+      { name: 'Re', keys: ['2', '8'], note: 'D5', cells: ['1c'] },
+      { name: 'Mi', keys: ['3', '9'], note: 'E5', cells: ['1d'] }
     ];
+
     const grid = document.getElementById('grid');
     const keyToDiv = {};
     const cellRefs = {};
@@ -419,12 +428,12 @@
     function updateBoxNames() {
       const currentKey = keyNames[currentKeyIndex];
       for (const btn of buttons) {
-        const div = noteButtonRefs[btn.key];
+        const div = noteButtonRefs[btn.keys[0]];
         if (!div) continue;
         if (cButtonState === 'note') {
-          div.textContent = buttonSolfegeNames[btn.key] || btn.name;
+          div.textContent = buttonSolfegeNames[btn.keys[0]] || btn.name;
         } else {
-          const solfege = buttonSolfegeNames[btn.key] || btn.name;
+          const solfege = buttonSolfegeNames[btn.keys[0]] || btn.name;
           div.textContent = (letterNamesByKey[currentKey] && letterNamesByKey[currentKey][solfege]) ? letterNamesByKey[currentKey][solfege] : solfege;
         }
       }
@@ -531,7 +540,7 @@
       div.className = 'note-button';
       div.textContent = btn.name;
       div.style.outline = 'none';
-      div.setAttribute('data-key', btn.key);
+      div.setAttribute('data-keys', btn.keys.join(','));
       const color = noteColorsByKey[keyNames[currentKeyIndex]][btn.name] || '#ccc';
       div.style.backgroundColor = color;
       const rows = [...new Set(btn.cells.map(c => positions[c][0]))];
@@ -545,48 +554,45 @@
       div.style.height = `${height}%`;
       div.style.width = `${width}%`;
       
-      // Mouse events
       div.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        handlePlayKey(btn.key);
+        handlePlayKey(btn.keys[0]);
         div.classList.add('active');
         window.focus();
       });
       div.addEventListener('mouseup', () => {
-        handleStopKey(btn.key);
+        handleStopKey(btn.keys[0]);
         div.classList.remove('active');
       });
       div.addEventListener('mouseleave', () => {
-        handleStopKey(btn.key);
+        handleStopKey(btn.keys[0]);
         div.classList.remove('active');
       });
-      
-      // Improved touch handling
       div.addEventListener('touchstart', (e) => {
         e.preventDefault();
         for (let i = 0; i < e.changedTouches.length; i++) {
           const touch = e.changedTouches[i];
-          activeTouches.set(touch.identifier, { key: btn.key, element: div });
+          activeTouches.set(touch.identifier, { key: btn.keys[0], element: div });
         }
-        handlePlayKey(btn.key);
+        handlePlayKey(btn.keys[0]);
         div.classList.add('active');
         window.focus();
       });
-      
+
       grid.appendChild(div);
-      keyToDiv[btn.key] = div;
-      noteButtonRefs[btn.key] = div;
+      btn.keys.forEach(k => {
+        keyToDiv[k] = div;
+        noteButtonRefs[k] = div;
+      });
     });
 
-    // Global touch event handlers
+    // Touch and mouse event cleanup
     document.addEventListener('touchend', handleTouchEnd);
     document.addEventListener('touchcancel', handleTouchEnd);
-    
     function handleTouchEnd(e) {
       for (let i = 0; i < e.changedTouches.length; i++) {
         const touch = e.changedTouches[i];
         const touchData = activeTouches.get(touch.identifier);
-        
         if (touchData) {
           if (touchData.key) {
             handleStopKey(touchData.key);
@@ -598,24 +604,17 @@
           } else if (touchData.type === 'flat') {
             setFlatTouchHeld(false);
           }
-          
           activeTouches.delete(touch.identifier);
         }
       }
     }
-    
-    // Global mouse event handlers
     document.addEventListener('mouseup', (e) => {
-      // Reset any mouse-held states that might get stuck
       accidentalHeld.sharp = false;
       accidentalHeld.flat = false;
       cellRefs['7d'].classList.remove('active');
       cellRefs['8d'].classList.remove('active');
-      
       setSharpTouchHeld(false);
       setFlatTouchHeld(false);
-      
-      // Stop any notes that might be stuck
       for (const key of [...heldNoteKeys]) {
         handleStopKey(key);
         if (keyToDiv[key]) {
@@ -624,12 +623,11 @@
       }
     });
 
-    // --- Update box names on toggle ---
     function updateSolfegeColors() {
       const currentKey = keyNames[currentKeyIndex];
       const bgColors = noteColorsByKey[currentKey];
       buttons.forEach(btn => {
-        const div = keyToDiv[btn.key];
+        const div = keyToDiv[btn.keys[0]];
         if (div) {
           if (bgColors[btn.name]) div.style.backgroundColor = bgColors[btn.name];
         }
@@ -664,7 +662,7 @@
         e.preventDefault();
         return;
       }
-      if (!heldKeys.has(e.key) && buttons.some(b => b.key === e.key)) {
+      if (!heldKeys.has(e.key) && buttons.some(b => b.keys.includes(e.key))) {
         heldKeys.add(e.key);
         handlePlayKey(e.key);
         if (keyToDiv[e.key]) keyToDiv[e.key].classList.add('active');
@@ -694,34 +692,24 @@
       }
     });
 
-    // Force note release on page visibility change
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
-        // Stop all notes when page is hidden
         for (const key of [...heldNoteKeys]) {
           handleStopKey(key);
         }
         heldNoteKeys.clear();
-        
-        // Reset all accidental and touch states
         accidentalHeld.sharp = false;
         accidentalHeld.flat = false;
         setSharpTouchHeld(false);
         setFlatTouchHeld(false);
-        
-        // Clear all active touches
         activeTouches.clear();
-        
-        // Remove visual active states
         document.querySelectorAll('.active').forEach(el => {
           el.classList.remove('active');
         });
       }
     });
 
-    // Emergency clean-up function for stuck notes
     window.addEventListener('blur', () => {
-      // Force stop all oscillators when window loses focus
       const activeOscKeys = Object.keys(activeOscillators);
       if (activeOscKeys.length > 0) {
         for (const key of activeOscKeys) {
@@ -730,7 +718,6 @@
       }
     });
     
-    // --- Resize logic ---
     function resizeGrid() {
       const gridEl = document.getElementById('grid');
       const gridWrapper = document.querySelector('.proportional-grid-wrapper');
@@ -758,7 +745,6 @@
       gridEl.querySelectorAll('.cell').forEach(div=>{
         div.style.fontSize = fontSize + 'px';
       });
-      // Also resize the Note/S button if it exists
       const toggleBtn = cellRefs['5d'].querySelector('.chord-toggle-btn');
       if (toggleBtn) toggleBtn.style.fontSize = Math.max(fontSize * 1.1, 20) + 'px';
     }
@@ -768,7 +754,6 @@
     const mq = window.matchMedia("(max-width: 550px)");
     mq.addEventListener("change", () => { resizeGrid(); updateSolfegeColors(); updateBoxNames(); });
 
-    // Initial update
     updateSolfegeColors();
     updateBoxNames();
   </script>

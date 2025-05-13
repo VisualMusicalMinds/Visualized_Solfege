@@ -43,7 +43,7 @@ html, body, #app-wrapper, .main-content {
   font-weight: bold;
   color: white;
   user-select: none;
-  transition: transform 0.1s, background-color 0.3s, font-size 0.2s;
+  transition: transform 0.1s, background-color 0.3s, font-size 0.2s, color 0.3s;
   outline: none;
   min-width: 0; min-height: 0;
   background: transparent;

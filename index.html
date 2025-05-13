@@ -61,6 +61,10 @@
     const keyNames = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
     let currentKeyIndex = 0;
 
+    // Define colors for sharp and flat notes
+    const DARK_RED = '#990000';
+    const DARK_BLUE = '#000099';
+
     const baseFrequencies = {
       'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
       'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
@@ -110,6 +114,16 @@
       'A':  { 'Do': 'A',  'Re': 'B',  'Mi': 'C#', 'Fa': 'D',  'So': 'E',  'La': 'F#', 'Ti': 'G#' },
       'Bb': { 'Do': 'Bb', 'Re': 'C',  'Mi': 'D',  'Fa': 'Eb', 'So': 'F',  'La': 'G',  'Ti': 'A' },
       'B':  { 'Do': 'B',  'Re': 'C#', 'Mi': 'D#', 'Fa': 'E',  'So': 'F#', 'La': 'G#', 'Ti': 'A#' }
+    };
+
+    // Map to identify if a note is flat or sharp
+    const noteAccidentalMap = {
+      'C': false, 'C#': 'sharp', 'Db': 'flat', 
+      'D': false, 'D#': 'sharp', 'Eb': 'flat',
+      'E': false, 'F': false, 'F#': 'sharp', 
+      'Gb': 'flat', 'G': false, 'G#': 'sharp', 
+      'Ab': 'flat', 'A': false, 'A#': 'sharp', 
+      'Bb': 'flat', 'B': false, 'Cb': 'flat'
     };
 
     // Use left hand solfege keys as base for names
@@ -439,11 +453,35 @@
       for (const btn of buttons) {
         const div = noteButtonRefs[btn.keys[0]];
         if (!div) continue;
+        
         if (cButtonState === 'note') {
           div.textContent = buttonSolfegeNames[btn.keys[0]] || btn.name;
+          
+          // Get the note name to check if it's flat or sharp
+          const solfege = buttonSolfegeNames[btn.keys[0]] || btn.name;
+          const noteValue = letterNamesByKey[currentKey][solfege];
+          
+          // Set text color based on accidental
+          if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
+            div.style.color = DARK_BLUE;
+          } else if (noteValue && noteAccidentalMap[noteValue] === 'sharp') {
+            div.style.color = DARK_RED;
+          } else {
+            div.style.color = 'white';
+          }
         } else {
           const solfege = buttonSolfegeNames[btn.keys[0]] || btn.name;
-          div.textContent = (letterNamesByKey[currentKey] && letterNamesByKey[currentKey][solfege]) ? letterNamesByKey[currentKey][solfege] : solfege;
+          const noteValue = letterNamesByKey[currentKey][solfege];
+          div.textContent = noteValue || solfege;
+          
+          // Set text color based on accidental
+          if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
+            div.style.color = DARK_BLUE;
+          } else if (noteValue && noteAccidentalMap[noteValue] === 'sharp') {
+            div.style.color = DARK_RED;
+          } else {
+            div.style.color = 'white';
+          }
         }
       }
     }
@@ -642,6 +680,18 @@
         const div = keyToDiv[btn.keys[0]];
         if (div) {
           if (bgColors[btn.name]) div.style.backgroundColor = bgColors[btn.name];
+          
+          // Update text color based on note value
+          const solfege = btn.name;
+          const noteValue = letterNamesByKey[currentKey][solfege];
+          
+          if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
+            div.style.color = DARK_BLUE;
+          } else if (noteValue && noteAccidentalMap[noteValue] === 'sharp') {
+            div.style.color = DARK_RED;
+          } else {
+            div.style.color = 'white';
+          }
         }
       });
     }

@@ -63,7 +63,8 @@
 
     const baseFrequencies = {
       'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
-      'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94
+      'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
+      'F5': 698.46 // Added F5 frequency
     };
     let noteFrequencies = { ...baseFrequencies };
 
@@ -139,7 +140,14 @@
       'o': 'Ti',
       '7': 'Do',
       '8': 'Re',
-      '9': 'Mi'
+      '9': 'Mi',
+      // Additional keybindings
+      'y': 'Fa',
+      'h': 'Ti',
+      '/': 'Do',
+      'p': 'Do',
+      '6': 'Ti',
+      '0': 'Fa' // For F5
     };
 
     const harmonics = 20;
@@ -308,21 +316,22 @@
       '1c': [0, 2], '1d': [0, 3]
     };
 
-    // Dual key binding per note
+    // Dual key binding per note (with additional bindings)
     const buttons = [
-      { name: 'Fa', keys: ['f', ';'], note: 'F4', cells: ['3a','4a'] },
+      { name: 'Fa', keys: ['f', ';', 'y'], note: 'F4', cells: ['3a','4a'] },
       { name: 'So', keys: ['z', 'm'], note: 'G3', cells: ['9b','9c'] }, // bottom So
       { name: 'Mi', keys: ['d', 'l'], note: 'E4', cells: ['5a'] },
       { name: 'Re', keys: ['s', 'k'], note: 'D4', cells: ['6a'] },
-      { name: 'Do', keys: ['a', 'j'], note: 'C4', cells: ['5b','6b','7b','5c','6c','7c'] },
+      { name: 'Do', keys: ['a', 'j', '/'], note: 'C4', cells: ['5b','6b','7b','5c','6c','7c'] },
       { name: 'La', keys: ['x', ','], note: 'A3', cells: ['8b'] },
-      { name: 'Ti', keys: ['c', '.'], note: 'B3', cells: ['8c'] },
+      { name: 'Ti', keys: ['c', '.', 'h'], note: 'B3', cells: ['8c'] },
       { name: 'So', keys: ['q', 'u'], note: 'G4', cells: ['3b','4b','3c','4c'] },
       { name: 'La', keys: ['w', 'i'], note: 'A4', cells: ['4d'] },
-      { name: 'Ti', keys: ['e', 'o'], note: 'B4', cells: ['3d'] },
-      { name: 'Do', keys: ['1', '7'], note: 'C5', cells: ['2c','2d'] },
+      { name: 'Ti', keys: ['e', 'o', '6'], note: 'B4', cells: ['3d'] },
+      { name: 'Do', keys: ['1', '7', 'p'], note: 'C5', cells: ['2c','2d'] },
       { name: 'Re', keys: ['2', '8'], note: 'D5', cells: ['1c'] },
-      { name: 'Mi', keys: ['3', '9'], note: 'E5', cells: ['1d'] }
+      { name: 'Mi', keys: ['3', '9'], note: 'E5', cells: ['1d'] },
+      { name: 'Fa', keys: ['0'], note: 'F5', cells: [] } // F5 note without visual representation
     ];
 
     const grid = document.getElementById('grid');
@@ -536,6 +545,9 @@
 
     // --- BUTTONS RENDERING ---
     buttons.forEach(btn => {
+      // Skip buttons with no visual representation (like F5)
+      if (btn.cells.length === 0) return;
+      
       const div = document.createElement('div');
       div.className = 'note-button';
       div.textContent = btn.name;

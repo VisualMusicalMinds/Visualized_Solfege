@@ -63,10 +63,16 @@ html, body, #app-wrapper, .main-content {
   white-space: nowrap;
   margin: 0;
   font-family: inherit;
+  transition: background-color 0.3s, color 0.3s;
+  cursor: pointer;
 }
 .control-area.selected {
   box-shadow: 0 0 0 0.6vmin #444a, 0 1px 8px #0002;
   background: #ffff;
+}
+.keyboard-button.active-control {
+  background-color: #007AFF;
+  color: white;
 }
 .arrow {
   cursor: pointer;

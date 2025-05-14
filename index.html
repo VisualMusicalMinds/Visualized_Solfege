@@ -29,6 +29,12 @@
       max-height: 100%;
       text-align: center;
     }
+    /* Smaller font for keyboard binding text */
+    .keybinding-text {
+      font-size: 0.71em;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+    }
   </style>
 </head>
 <body>
@@ -43,7 +49,7 @@
   <script>
     // --- AUDIO & STATE ---
     const context = new (window.AudioContext || window.webkitAudioContext)();
-    
+
     const compressor = context.createDynamicsCompressor();
     compressor.threshold.value = -24;
     compressor.knee.value = 30;
@@ -51,7 +57,7 @@
     compressor.attack.value = 0.003;
     compressor.release.value = 0.25;
     compressor.connect(context.destination);
-    
+
     const activeTouches = new Map();
     const waveforms = ['sine', 'triangle', 'square', 'sawtooth', 'voice'];
     let currentWaveformIndex = 1;
@@ -120,11 +126,11 @@
 
     // Map to identify if a note is flat or sharp
     const noteAccidentalMap = {
-      'C': false, 'C#': 'sharp', 'Db': 'flat', 
+      'C': false, 'C#': 'sharp', 'Db': 'flat',
       'D': false, 'D#': 'sharp', 'Eb': 'flat',
-      'E': false, 'F': false, 'F#': 'sharp', 
-      'Gb': 'flat', 'G': false, 'G#': 'sharp', 
-      'Ab': 'flat', 'A': false, 'A#': 'sharp', 
+      'E': false, 'F': false, 'F#': 'sharp',
+      'Gb': 'flat', 'G': false, 'G#': 'sharp',
+      'Ab': 'flat', 'A': false, 'A#': 'sharp',
       'Bb': 'flat', 'B': false, 'Cb': 'flat'
     };
 
@@ -170,7 +176,7 @@
     const keyboardDisplayPairs = {
       // Upper keys (correct)
       'Fa': 'f | ;', // For middle Fa
-      
+
       // Lower keys (corrected)
       'Mi': 'd | l', // For middle Mi
       'Re': 's | k', // For middle Re
@@ -190,7 +196,7 @@
       'low_Ti': 'c | .', // For low Ti
       'low_La': 'x | ,', // For low La
       'low_So': 'z | m', // For low So
-      
+
       // Upper section keys
       'high_So': 'q | u', // For high So
       'high_La': 'w | i', // For high La
@@ -256,18 +262,18 @@
 
     function startNote(key, freq) {
       stopNote(key);
-      
+
       const now = context.currentTime;
       let osc, gain, lfo, lfoGain, filter;
-      
+
       gain = context.createGain();
       gain.gain.setValueAtTime(0, now);
-      
+
       if (currentWaveform === "voice") {
         osc = context.createOscillator();
         osc.setPeriodicWave(customVoiceWave);
         osc.frequency.value = freq;
-        
+
         lfo = context.createOscillator();
         lfoGain = context.createGain();
         lfo.frequency.setValueAtTime(1.5, now);
@@ -276,46 +282,46 @@
         lfo.connect(lfoGain);
         lfoGain.connect(osc.frequency);
         lfo.start();
-        
+
         filter = context.createBiquadFilter();
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(1200, now);
         filter.Q.value = 1;
-        
+
         osc.connect(filter);
         filter.connect(gain);
-        
+
         const attackTime = 0.08;
         const decayTime = 0.18;
         const sustainLevel = globalVolume * 0.5;
         const maxLevel = globalVolume * 0.85;
-        
+
         gain.gain.linearRampToValueAtTime(maxLevel, now + attackTime);
         gain.gain.linearRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
-        
+
         gain.connect(compressor);
         osc.start();
-        
+
         activeOscillators[key] = { osc, gain, lfo, lfoGain, filter };
       } else {
         osc = context.createOscillator();
         osc.type = currentWaveform;
         osc.frequency.value = freq;
-        
+
         filter = context.createBiquadFilter();
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(1200, now);
         filter.Q.value = 1;
-        
+
         osc.connect(filter);
         filter.connect(gain);
-        
+
         const attackTime = 0.015;
         gain.gain.linearRampToValueAtTime(globalVolume, now + attackTime);
-        
+
         gain.connect(compressor);
         osc.start();
-        
+
         activeOscillators[key] = { osc, gain, filter };
       }
     }
@@ -323,12 +329,12 @@
     function stopNote(key) {
       const active = activeOscillators[key];
       if (!active) return;
-      
+
       const now = context.currentTime;
-      
+
       if (active.osc) {
         const gain = active.gain;
-        
+
         if (currentWaveform === "voice") {
           gain.gain.cancelScheduledValues(now);
           gain.gain.setValueAtTime(gain.gain.value, now);
@@ -346,7 +352,7 @@
           active.osc.stop(now + releaseTime + stopBuffer);
         }
       }
-      
+
       delete activeOscillators[key];
     }
 
@@ -485,7 +491,7 @@
     // Improved Sharp/Flat touch handlers
     const sharpCell = cellRefs['7d'];
     const flatCell = cellRefs['8d'];
-    
+
     sharpCell.addEventListener('touchstart', function(e) {
       e.preventDefault();
       for (let i = 0; i < e.changedTouches.length; i++) {
@@ -494,7 +500,7 @@
       }
       setSharpTouchHeld(true);
     });
-    
+
     flatCell.addEventListener('touchstart', function(e) {
       e.preventDefault();
       for (let i = 0; i < e.changedTouches.length; i++) {
@@ -503,12 +509,12 @@
       }
       setFlatTouchHeld(true);
     });
-    
+
     sharpCell.addEventListener('mousedown', function(e) {
       e.preventDefault();
       setSharpTouchHeld(true);
     });
-    
+
     flatCell.addEventListener('mousedown', function(e) {
       e.preventDefault();
       setFlatTouchHeld(true);
@@ -519,33 +525,35 @@
 
     function updateBoxNames() {
       const currentKey = keyNames[currentKeyIndex];
-      
+
       for (const btn of buttons) {
         const div = noteButtonRefs[btn.keys[0]];
         if (!div) continue;
-        
+
         // Keyboard mode display takes precedence over other modes
         if (keyboardButtonActive) {
           // Find position group for the current key
           const keyPosition = keyToPositionGroup[btn.keys[0]];
-          
+
           // Get the keyboard display text based on position
+          let kbText = '';
           if (keyboardDisplayPairsWithPosition[keyPosition]) {
-            div.textContent = keyboardDisplayPairsWithPosition[keyPosition];
+            kbText = keyboardDisplayPairsWithPosition[keyPosition];
           } else {
-            // Fallback to name-based mapping
-            div.textContent = keyboardDisplayPairs[btn.name] || '';
+            kbText = keyboardDisplayPairs[btn.name] || '';
           }
-          
+
+          // Use .keybinding-text span for smaller font
+          div.innerHTML = `<span class="keybinding-text">${kbText}</span>`;
           div.style.color = 'white';
-        } 
+        }
         else if (cButtonState === 'note') {
           div.textContent = buttonSolfegeNames[btn.keys[0]] || btn.name;
-          
+
           // Get the note name to check if it's flat or sharp
           const solfege = buttonSolfegeNames[btn.keys[0]] || btn.name;
           const noteValue = letterNamesByKey[currentKey][solfege];
-          
+
           // Set text color based on accidental
           if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
             div.style.color = DARK_BLUE;
@@ -554,12 +562,12 @@
           } else {
             div.style.color = 'white';
           }
-        } 
+        }
         else {
           const solfege = buttonSolfegeNames[btn.keys[0]] || btn.name;
           const noteValue = letterNamesByKey[currentKey][solfege];
           div.textContent = noteValue || solfege;
-          
+
           // Set text color based on accidental
           if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
             div.style.color = DARK_BLUE;
@@ -579,13 +587,13 @@
     keyButton.tabIndex = 0;
     keyButton.setAttribute('aria-label', 'Key control');
     keyButton.innerHTML = '<div class="arrow" id="key-left">&#9664;</div><div id="key-name">C Major</div><div class="arrow" id="key-right">&#9654;</div>';
-    
+
     const waveButton = document.createElement('div');
     waveButton.className = 'control-area';
     waveButton.tabIndex = 0;
     waveButton.setAttribute('aria-label', 'Waveform control');
     waveButton.innerHTML = '<div class="arrow" id="left-arrow">&#9664;</div><div id="waveform-name">triangle</div><div class="arrow" id="right-arrow">&#9654;</div>';
-    
+
     const volumeControl = document.createElement('div');
     volumeControl.className = 'volume-control';
     volumeControl.innerHTML = `
@@ -596,7 +604,7 @@
     volumeControl.tabIndex = 0;
     volumeControl.setAttribute('aria-label', 'Volume control');
     volumeControl.style.outline = 'none';
-    
+
     // Create new Keyboard button
     const keyboardButton = document.createElement('div');
     keyboardButton.className = 'control-area keyboard-button';
@@ -604,7 +612,7 @@
     keyboardButton.setAttribute('aria-label', 'Keyboard view toggle');
     keyboardButton.textContent = 'Keyboard';
     keyboardButton.id = 'keyboard-button';
-    
+
     function updateKeyboardButton() {
       if (keyboardButtonActive) {
         keyboardButton.classList.add('active-control');
@@ -616,13 +624,13 @@
         keyboardButton.style.color = '';
       }
     }
-    
+
     keyboardButton.addEventListener('click', () => {
       keyboardButtonActive = !keyboardButtonActive;
       updateKeyboardButton();
       updateBoxNames();
     });
-    
+
     volumeControl.addEventListener('focus', () => {
       volumeControl.style.boxShadow = '0 0 0 0.5vmin #007aff88';
     });
@@ -642,12 +650,12 @@
         e.preventDefault();
       }
     });
-    
+
     controlsBar.appendChild(keyButton);
     controlsBar.appendChild(waveButton);
     controlsBar.appendChild(volumeControl);
     controlsBar.appendChild(keyboardButton); // Add keyboard button to controls
-    
+
     document.getElementById("key-left").onclick = () => {
       currentKeyIndex = (currentKeyIndex - 1 + keyNames.length) % keyNames.length;
       document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
@@ -708,7 +716,7 @@
     buttons.forEach(btn => {
       // Skip buttons with no visual representation (like F5)
       if (btn.cells.length === 0) return;
-      
+
       const div = document.createElement('div');
       div.className = 'note-button';
       div.textContent = btn.name;
@@ -726,7 +734,7 @@
       div.style.left = `${left}%`;
       div.style.height = `${height}%`;
       div.style.width = `${width}%`;
-      
+
       div.addEventListener('mousedown', (e) => {
         e.preventDefault();
         handlePlayKey(btn.keys[0]);
@@ -803,13 +811,13 @@
         const div = keyToDiv[btn.keys[0]];
         if (div) {
           if (bgColors[btn.name]) div.style.backgroundColor = bgColors[btn.name];
-          
+
           // Only update text color if not in keyboard mode
           if (!keyboardButtonActive) {
             // Update text color based on note value
             const solfege = btn.name;
             const noteValue = letterNamesByKey[currentKey][solfege];
-            
+
             if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
               div.style.color = DARK_BLUE;
             } else if (noteValue && noteAccidentalMap[noteValue] === 'sharp') {
@@ -912,7 +920,7 @@
         }
       }
     });
-    
+
     function resizeGrid() {
       const gridEl = document.getElementById('grid');
       const gridWrapper = document.querySelector('.proportional-grid-wrapper');

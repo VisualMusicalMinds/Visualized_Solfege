@@ -166,24 +166,42 @@
       '0': 'Fa' // For F5
     };
 
-    // Define primary key pairs for display in keyboard mode
+    // Define primary key pairs for display in keyboard mode - CORRECTED
     const keyboardDisplayPairs = {
-      'So': 'z | m', // For low So
-      'La': 'x | ,', // For low La
-      'Ti': 'c | .', // For low Ti
-      'Do': 'a | j', // For middle Do
-      'Re': 's | k', // For middle Re
-      'Mi': 'd | l', // For middle Mi
+      // Upper keys (correct)
       'Fa': 'f | ;', // For middle Fa
-      'So': 'q | u', // For high So
-      'La': 'w | i', // For high La
-      'Ti': 'e | o', // For high Ti
-      'Do': '1 | 7', // For higher Do
-      'Re': '2 | 8', // For higher Re
-      'Mi': '3 | 9'  // For higher Mi
+      
+      // Lower keys (corrected)
+      'Mi': 'd | l', // For middle Mi
+      'Re': 's | k', // For middle Re
+      'Do': 'a | j', // For middle Do
+      'Ti': 'c | .', // For low Ti
+      'La': 'x | ,', // For low La
+      'So': 'z | m'  // For low So
     };
 
-    // Map button keys to which note they represent (grouped by note)
+    // Additional keyboard display pairs for the distinct positions
+    const keyboardDisplayPairsWithPosition = {
+      // For the buttons in the array, the positions are mapped correctly based on the provided code
+      'mid_Fa': 'f | ;',  // For middle Fa
+      'mid_Mi': 'd | l',  // For middle Mi
+      'mid_Re': 's | k',  // For middle Re
+      'mid_Do': 'a | j',  // For middle Do
+      'low_Ti': 'c | .', // For low Ti
+      'low_La': 'x | ,', // For low La
+      'low_So': 'z | m', // For low So
+      
+      // Upper section keys
+      'high_So': 'q | u', // For high So
+      'high_La': 'w | i', // For high La
+      'high_Ti': 'e | o', // For high Ti
+      'higher_Do': '1 | 7', // For higher Do
+      'higher_Re': '2 | 8', // For higher Re
+      'higher_Mi': '3 | 9', // For higher Mi
+      'highest_Fa': '0'    // For highest Fa (F5)
+    };
+
+    // Map button keys to which note they represent (grouped by note position)
     const keyGroups = {
       'low_So': ['z', 'm'],
       'low_La': ['x', ','],
@@ -200,6 +218,14 @@
       'higher_Mi': ['3', '9'],
       'highest_Fa': ['0']
     };
+
+    // Map to find the position group for a key
+    const keyToPositionGroup = {};
+    for (const [group, keys] of Object.entries(keyGroups)) {
+      for (const key of keys) {
+        keyToPositionGroup[key] = group;
+      }
+    }
 
     const harmonics = 20;
     const real = new Float32Array(harmonics);
@@ -500,8 +526,17 @@
         
         // Keyboard mode display takes precedence over other modes
         if (keyboardButtonActive) {
-          // Get the keyboard display text based on button name
-          div.textContent = keyboardDisplayPairs[btn.name] || '';
+          // Find position group for the current key
+          const keyPosition = keyToPositionGroup[btn.keys[0]];
+          
+          // Get the keyboard display text based on position
+          if (keyboardDisplayPairsWithPosition[keyPosition]) {
+            div.textContent = keyboardDisplayPairsWithPosition[keyPosition];
+          } else {
+            // Fallback to name-based mapping
+            div.textContent = keyboardDisplayPairs[btn.name] || '';
+          }
+          
           div.style.color = 'white';
         } 
         else if (cButtonState === 'note') {

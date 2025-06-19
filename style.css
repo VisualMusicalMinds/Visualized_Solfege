@@ -2,7 +2,13 @@ html, body, #app-wrapper, .main-content {
   height: 100%; min-height: 0; min-width: 0;
   margin: 0; padding: 0; box-sizing: border-box;
 }
-#app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+
+#app-wrapper { 
+  display: flex; 
+  flex-direction: column; 
+  height: 100vh; 
+}
+
 .controls-bar {
   width: 100vw;
   box-sizing: border-box;
@@ -19,44 +25,111 @@ html, body, #app-wrapper, .main-content {
   flex-grow: 0;
   flex-basis: auto;
   transition: flex-direction 0.2s;
+  position: relative;
 }
+
+/* Accordion toggle button - only visible on mobile */
+.accordion-toggle {
+  display: none;
+  width: 100%;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 0.8em 1em;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  cursor: pointer;
+  z-index: 20;
+  outline: none;
+  transition: background-color 0.2s;
+  font-family: inherit;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+  border-bottom: 1px solid #eee;
+}
+
+.accordion-toggle:hover {
+  background: #0056b3;
+}
+
+.accordion-toggle:focus {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Controls container for mobile accordion */
+.controls-container {
+  display: contents;
+}
+
 .main-content {
   flex: 1 1 0;
-  display: flex; flex-direction: column;
-  min-height: 0; min-width: 0; height: 100%;
-  overflow: hidden; position: relative;
+  display: flex; 
+  flex-direction: column;
+  min-height: 0; 
+  min-width: 0; 
+  height: 100%;
+  overflow: hidden; 
+  position: relative;
 }
+
 .proportional-grid-wrapper {
   flex: 1 1 0;
-  min-height: 0; min-width: 0;
-  display: flex; align-items: center; justify-content: center;
-  position: relative; width: 100vw; overflow: hidden;
+  min-height: 0; 
+  min-width: 0;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  position: relative; 
+  width: 100vw; 
+  overflow: hidden;
+  transition: transform 0.3s ease-out;
 }
+
+/* Shift grid down when menu is expanded on mobile */
+.proportional-grid-wrapper.menu-expanded {
+  transform: translateY(calc(1.5 * (100vh / 11)));
+}
+
 .grid {
   position: relative;
-  width: 100%; height: 100%;
+  width: 100%; 
+  height: 100%;
 }
+
 .cell, .note-button {
   border-radius: 1vmin;
   position: absolute;
-  display: flex; justify-content: center; align-items: center;
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
   font-weight: bold;
   color: white;
   user-select: none;
   transition: transform 0.1s, background-color 0.3s, font-size 0.2s, color 0.3s;
   outline: none;
-  min-width: 0; min-height: 0;
+  min-width: 0; 
+  min-height: 0;
   background: transparent;
   z-index: 1;
   font-family: 'EB Garamond', Garamond, 'Times New Roman', Times, serif;
   letter-spacing: 0.02em;
 }
-.note-button { z-index: 2; }
-.active { transform: scale(1.30); }
+
+.note-button { 
+  z-index: 2; 
+}
+
+.active { 
+  transform: scale(1.30); 
+}
+
 .control-area {
   outline: none;
   border-radius: 0.8vmin;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
   font-size: clamp(1rem, min(2.8vw, 2.8vh, 2em), 2em);
   padding: 0.3em 1em;
   background: #fff;
@@ -66,14 +139,17 @@ html, body, #app-wrapper, .main-content {
   transition: background-color 0.3s, color 0.3s;
   cursor: pointer;
 }
+
 .control-area.selected {
   box-shadow: 0 0 0 0.6vmin #444a, 0 1px 8px #0002;
   background: #ffff;
 }
+
 .keyboard-button.active-control {
   background-color: #007AFF;
   color: white;
 }
+
 .arrow {
   cursor: pointer;
   padding: 0.2em 0.5em;
@@ -81,8 +157,11 @@ html, body, #app-wrapper, .main-content {
   font-size: inherit;
   font-family: inherit;
 }
+
 .volume-control {
-  display: flex; align-items: center; justify-content: center;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
   gap: 0.5vw;
   font-size: clamp(1rem, min(2.2vw, 2.2vh, 1.2em), 1.2em);
   user-select: none;
@@ -92,6 +171,7 @@ html, body, #app-wrapper, .main-content {
   margin: 0;
   font-family: inherit;
 }
+
 .volume-slider {
   width: min(16vw, 140px);
   accent-color: #007AFF;
@@ -99,7 +179,12 @@ html, body, #app-wrapper, .main-content {
   min-width: 60px;
   max-width: 180px;
 }
-.volume-label { font-weight: bold; margin-right: 0.3em; }
+
+.volume-label { 
+  font-weight: bold; 
+  margin-right: 0.3em; 
+}
+
 .volume-value {
   width: 3.2em;
   text-align: left;
@@ -109,6 +194,7 @@ html, body, #app-wrapper, .main-content {
   margin-left: 0.3em;
   letter-spacing: 0.04em;
 }
+
 .cell img.solfege-img {
   max-width: 80%;
   max-height: 80%;
@@ -123,24 +209,46 @@ html, body, #app-wrapper, .main-content {
 
 /* Chord toggle button (Note/S) in grid cell */
 .chord-toggle-btn {
-  font-family: 'EB Garamond', Garamond, 'Times New Roman', Times, serif;
-  font-weight: bold;
-  font-size: 2em;
+  padding: 0;
+  margin: 0;
   background: transparent;
   border: none;
-  color: #222;
   width: 100%;
   height: 100%;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: clamp(1.2em, 6vw, 2em);
+  line-height: 1;
+  overflow: hidden;
+  font-family: 'EB Garamond', Garamond, 'Times New Roman', Times, serif;
+  font-weight: bold;
+  color: #222;
+  cursor: pointer;
   outline: none;
   transition: background 0.15s, color 0.15s, font-size 0.15s;
 }
+
+.chord-toggle-btn .music-symbol {
+  font-size: 1em;
+  line-height: 1;
+  vertical-align: middle;
+  display: inline-block;
+  max-width: 100%;
+  max-height: 100%;
+  text-align: center;
+}
+
 .chord-toggle-btn:focus {
   outline: 2px solid #007AFF;
   background: #f4f8ff;
+}
+
+/* Smaller font for keyboard binding text */
+.keybinding-text {
+  font-size: 0.71em;
+  font-weight: normal;
+  letter-spacing: 0.02em;
 }
 
 @media (max-width: 550px) {
@@ -148,9 +256,33 @@ html, body, #app-wrapper, .main-content {
     flex-direction: column;
     align-items: stretch;
     gap: 0;
-    padding-bottom: 0;
-    padding-top: 0;
+    padding: 0; /* Remove padding to let accordion button fill width */
   }
+
+  /* Show accordion toggle button on mobile */
+  .accordion-toggle {
+    display: block;
+    order: -1; /* Ensure it appears first */
+  }
+
+  /* Controls container that can be collapsed */
+  .controls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    order: 1; /* Ensure it appears after the accordion button */
+  }
+
+  .controls-container.collapsed {
+    max-height: 0;
+  }
+
+  .controls-container.expanded {
+    max-height: 300px; /* Adjust based on your content height */
+  }
+  
   .control-area, .volume-control {
     width: 100%;
     margin: 0;
@@ -162,8 +294,36 @@ html, body, #app-wrapper, .main-content {
     min-height: 0;
     min-width: 0;
     font-size: clamp(1rem, min(2.5vw, 2.5vh, 1.5em), 1.5em);
+    padding: 0.8em 1em; /* Increase padding for better touch targets */
   }
-  .controls-bar > *:last-child {
+  
+  .controls-container > *:last-child {
     border-bottom: none !important;
+  }
+
+  /* Accordion button styles */
+  .accordion-toggle .icon {
+    margin-left: 0.5em;
+    transition: transform 0.2s;
+    font-size: 1.2em;
+  }
+
+  .accordion-toggle.collapsed .icon {
+    transform: rotate(0deg);
+  }
+
+  .accordion-toggle.expanded .icon {
+    transform: rotate(180deg);
+  }
+
+  /* Adjust volume control for mobile */
+  .volume-control {
+    padding: 0.8em 1em;
+    gap: 0.8em;
+  }
+
+  .volume-slider {
+    width: min(40vw, 200px);
+    min-width: 120px;
   }
 }

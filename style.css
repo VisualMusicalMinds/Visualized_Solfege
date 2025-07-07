@@ -271,16 +271,30 @@ html, body, #app-wrapper, .main-content {
     flex-direction: column;
     align-items: stretch;
     overflow: hidden;
-    transition: max-height 0.3s ease-out;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
     order: 1; /* Ensure it appears after the accordion button */
   }
 
-  .controls-container.collapsed {
-    max-height: 0;
+  .controls-bar .controls-container.collapsed {
+    display: none;
   }
 
-  .controls-container.expanded {
-    max-height: 300px; /* Adjust based on your content height */
+  .controls-bar .controls-container.expanded {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   .control-area, .volume-control {

@@ -352,6 +352,8 @@ function updateAccordionState() {
     accordionToggle.classList.remove('expanded');
     accordionToggle.classList.add('collapsed');
     accordionToggle.innerHTML = 'Menu <span class="icon">▼</span>';
+    accordionToggle.setAttribute('aria-expanded', 'false');
+    controlsContainer.setAttribute('aria-hidden', 'true');
     gridWrapper.classList.remove('menu-expanded');
   } else {
     controlsContainer.classList.remove('collapsed');
@@ -359,6 +361,8 @@ function updateAccordionState() {
     accordionToggle.classList.remove('collapsed');
     accordionToggle.classList.add('expanded');
     accordionToggle.innerHTML = 'Menu <span class="icon">▲</span>';
+    accordionToggle.setAttribute('aria-expanded', 'true');
+    controlsContainer.setAttribute('aria-hidden', 'false');
     gridWrapper.classList.add('menu-expanded');
   }
 }
@@ -523,9 +527,24 @@ function createControlsBar() {
   accordionToggle.innerHTML = 'Menu <span class="icon">▼</span>';
   accordionToggle.addEventListener('click', toggleAccordion);
   
+  // Add keyboard support
+  accordionToggle.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleAccordion();
+    }
+  });
+  
+  // Add accessibility attributes
+  accordionToggle.setAttribute('aria-expanded', 'false');
+  accordionToggle.setAttribute('aria-controls', 'controls-container');
+  accordionToggle.setAttribute('aria-label', 'Toggle menu controls');
+  
   // Create controls container
   const controlsContainer = document.createElement('div');
   controlsContainer.className = 'controls-container collapsed';
+  controlsContainer.id = 'controls-container';
+  controlsContainer.setAttribute('aria-hidden', 'true');
   
   // Key control
   const keyButton = document.createElement('div');
@@ -570,6 +589,14 @@ function createControlsBar() {
   // Add both accordion toggle and container to controls bar
   controlsBar.appendChild(accordionToggle);
   controlsBar.appendChild(controlsContainer);
+
+  // Ensure proper initial state on mobile
+  setTimeout(() => {
+    const mq = window.matchMedia("(max-width: 550px)");
+    if (mq.matches) {
+      updateAccordionState();
+    }
+  }, 0);
 
   return { keyButton, waveButton, volumeControl, keyboardButton };
 }

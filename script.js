@@ -867,13 +867,19 @@ function setupGlobalEventHandlers() {
         controlsContainer.classList.remove('collapsed', 'expanded');
       }
       if (accordionToggle) {
-        accordionToggle.style.display = 'none';
+        // Remove any inline styles and let CSS media queries handle visibility
+        accordionToggle.style.display = '';
       }
       if (gridWrapper) {
         gridWrapper.classList.remove('menu-expanded');
       }
     } else {
       // Ensure proper state on mobile
+      const accordionToggle = document.querySelector('.accordion-toggle');
+      if (accordionToggle) {
+        // Remove any inline styles and let CSS media queries handle visibility
+        accordionToggle.style.display = '';
+      }
       updateAccordionState();
     }
   });

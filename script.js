@@ -70,28 +70,139 @@ const scaleDefinitions = {
   }
 };
 
+const scaleSpellings = {
+    'C': {
+        'major': ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+        'dorian': ['C', 'D', 'E♭', 'F', 'G', 'A', 'B♭'],
+        'phrygian': ['C', 'D♭', 'E♭', 'F', 'G', 'A♭', 'B♭'],
+        'lydian': ['C', 'D', 'E', 'F♯', 'G', 'A', 'B'],
+        'mixolydian': ['C', 'D', 'E', 'F', 'G', 'A', 'B♭'],
+        'natural-minor': ['C', 'D', 'E♭', 'F', 'G', 'A♭', 'B♭'],
+        'locrian': ['C', 'D♭', 'E♭', 'F', 'G♭', 'A♭', 'B♭']
+    },
+    'Db': {
+        'major': ['D♭', 'E♭', 'F', 'G♭', 'A♭', 'B♭', 'C'],
+        'dorian': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭', 'C♭'],
+        'phrygian': ['D♭', 'E♭♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C♭'],
+        'lydian': ['D♭', 'E♭', 'F', 'G', 'A♭', 'B♭', 'C'],
+        'mixolydian': ['D♭', 'E♭', 'F', 'G♭', 'A♭', 'B♭', 'C♭'],
+        'natural-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C♭'],
+        'locrian': ['D♭', 'E♭♭', 'F♭', 'G♭♭', 'A♭♭', 'B♭♭', 'C♭']
+    },
+    'D': {
+        'major': ['D', 'E', 'F♯', 'G', 'A', 'B', 'C♯'],
+        'dorian': ['D', 'E', 'F', 'G', 'A', 'B', 'C'],
+        'phrygian': ['D', 'E♭', 'F', 'G', 'A', 'B♭', 'C'],
+        'lydian': ['D', 'E', 'F♯', 'G♯', 'A', 'B', 'C♯'],
+        'mixolydian': ['D', 'E', 'F♯', 'G', 'A', 'B', 'C'],
+        'natural-minor': ['D', 'E', 'F', 'G', 'A', 'B♭', 'C'],
+        'locrian': ['D', 'E♭', 'F', 'G', 'A♭', 'B♭', 'C']
+    },
+    'Eb': {
+        'major': ['E♭', 'F', 'G', 'A♭', 'B♭', 'C', 'D'],
+        'dorian': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C', 'D♭'],
+        'phrygian': ['E♭', 'F♭', 'G♭', 'A♭', 'B♭', 'C♭', 'D♭'],
+        'lydian': ['E♭', 'F', 'G', 'A', 'B♭', 'C', 'D'],
+        'mixolydian': ['E♭', 'F', 'G', 'A♭', 'B♭', 'C', 'D♭'],
+        'natural-minor': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C♭', 'D♭'],
+        'locrian': ['E♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C♭', 'D♭']
+    },
+    'E': {
+        'major': ['E', 'F♯', 'G♯', 'A', 'B', 'C♯', 'D♯'],
+        'dorian': ['E', 'F♯', 'G', 'A', 'B', 'C♯', 'D'],
+        'phrygian': ['E', 'F', 'G', 'A', 'B', 'C', 'D'],
+        'lydian': ['E', 'F♯', 'G♯', 'A♯', 'B', 'C♯', 'D♯'],
+        'mixolydian': ['E', 'F♯', 'G♯', 'A', 'B', 'C♯', 'D'],
+        'natural-minor': ['E', 'F♯', 'G', 'A', 'B', 'C', 'D'],
+        'locrian': ['E', 'F', 'G', 'A', 'B♭', 'C', 'D']
+    },
+    'F': {
+        'major': ['F', 'G', 'A', 'B♭', 'C', 'D', 'E'],
+        'dorian': ['F', 'G', 'A♭', 'B♭', 'C', 'D', 'E♭'],
+        'phrygian': ['F', 'G♭', 'A♭', 'B♭', 'C', 'D♭', 'E♭'],
+        'lydian': ['F', 'G', 'A', 'B', 'C', 'D', 'E'],
+        'mixolydian': ['F', 'G', 'A', 'B♭', 'C', 'D', 'E♭'],
+        'natural-minor': ['F', 'G', 'A♭', 'B♭', 'C', 'D♭', 'E♭'],
+        'locrian': ['F', 'G♭', 'A♭', 'B♭', 'C♭', 'D♭', 'E♭']
+    },
+    'Gb': {
+        'major': ['G♭', 'A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F'],
+        'dorian': ['G♭', 'A♭', 'B♭♭', 'C♭', 'D♭', 'E♭', 'F♭'],
+        'phrygian': ['G♭', 'A♭♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F♭'],
+        'lydian': ['G♭', 'A♭', 'B♭', 'C', 'D♭', 'E♭', 'F'],
+        'mixolydian': ['G♭', 'A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F♭'],
+        'natural-minor': ['G♭', 'A♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F♭'],
+        'locrian': ['G♭', 'A♭♭', 'B♭♭', 'C♭', 'D♭♭', 'E♭♭', 'F♭']
+    },
+    'G': {
+        'major': ['G', 'A', 'B', 'C', 'D', 'E', 'F♯'],
+        'dorian': ['G', 'A', 'B♭', 'C', 'D', 'E', 'F'],
+        'phrygian': ['G', 'A♭', 'B♭', 'C', 'D', 'E♭', 'F'],
+        'lydian': ['G', 'A', 'B', 'C♯', 'D', 'E', 'F♯'],
+        'mixolydian': ['G', 'A', 'B', 'C', 'D', 'E', 'F'],
+        'natural-minor': ['G', 'A', 'B♭', 'C', 'D', 'E♭', 'F'],
+        'locrian': ['G', 'A♭', 'B♭', 'C', 'D♭', 'E♭', 'F']
+    },
+    'Ab': {
+        'major': ['A♭', 'B♭', 'C', 'D♭', 'E♭', 'F', 'G'],
+        'dorian': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F', 'G♭'],
+        'phrygian': ['A♭', 'B♭♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G♭'],
+        'lydian': ['A♭', 'B♭', 'C', 'D', 'E♭', 'F', 'G'],
+        'mixolydian': ['A♭', 'B♭', 'C', 'D♭', 'E♭', 'F', 'G♭'],
+        'natural-minor': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G♭'],
+        'locrian': ['A♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F♭', 'G♭']
+    },
+    'A': {
+        'major': ['A', 'B', 'C♯', 'D', 'E', 'F♯', 'G♯'],
+        'dorian': ['A', 'B', 'C', 'D', 'E', 'F♯', 'G'],
+        'phrygian': ['A', 'B♭', 'C', 'D', 'E', 'F', 'G'],
+        'lydian': ['A', 'B', 'C♯', 'D♯', 'E', 'F♯', 'G♯'],
+        'mixolydian': ['A', 'B', 'C♯', 'D', 'E', 'F♯', 'G'],
+        'natural-minor': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+        'locrian': ['A', 'B♭', 'C', 'D', 'E♭', 'F', 'G']
+    },
+    'Bb': {
+        'major': ['B♭', 'C', 'D', 'E♭', 'F', 'G', 'A'],
+        'dorian': ['B♭', 'C', 'D♭', 'E♭', 'F', 'G', 'A♭'],
+        'phrygian': ['B♭', 'C♭', 'D♭', 'E♭', 'F', 'G♭', 'A♭'],
+        'lydian': ['B♭', 'C', 'D', 'E', 'F', 'G', 'A'],
+        'mixolydian': ['B♭', 'C', 'D', 'E♭', 'F', 'G', 'A♭'],
+        'natural-minor': ['B♭', 'C', 'D♭', 'E♭', 'F', 'G♭', 'A♭'],
+        'locrian': ['B♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G♭', 'A♭']
+    },
+    'B': {
+        'major': ['B', 'C♯', 'D♯', 'E', 'F♯', 'G♯', 'A♯'],
+        'dorian': ['B', 'C♯', 'D', 'E', 'F♯', 'G♯', 'A'],
+        'phrygian': ['B', 'C', 'D', 'E', 'F♯', 'G', 'A'],
+        'lydian': ['B', 'C♯', 'D♯', 'E♯', 'F♯', 'G♯', 'A♯'],
+        'mixolydian': ['B', 'C♯', 'D♯', 'E', 'F♯', 'G♯', 'A'],
+        'natural-minor': ['B', 'C♯', 'D', 'E', 'F♯', 'G', 'A'],
+        'locrian': ['B', 'C', 'D', 'E', 'F', 'G', 'A']
+    }
+};
+
 // Define colors for sharp and flat notes
 const DARK_RED = '#990000';
 const DARK_BLUE = '#000099';
 
-// Helper function to get note names in chromatic order
-const chromaticNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-
-// Generate letter names for a specific key and scale
+// Generate letter names for a specific key and scale using the new lookup table
 function generateLetterNamesForScale(keyName, scaleName) {
-  const scale = scaleDefinitions[scaleName];
-  if (!scale) return {};
-  
-  const keyIndex = chromaticNotes.indexOf(keyName);
-  const letterNames = {};
-  
-  scale.solfege.forEach((solfege, index) => {
-    const noteIndex = (keyIndex + scale.intervals[index]) % 12;
-    letterNames[solfege] = chromaticNotes[noteIndex];
-  });
-  
-  return letterNames;
+    const scale = scaleDefinitions[scaleName];
+    if (!scale) return {};
+
+    // Use the hardcoded spellings
+    const notes = scaleSpellings[keyName]?.[scaleName] || [];
+    const letterNames = {};
+
+    scale.solfege.forEach((solfege, index) => {
+        if (notes[index]) {
+            letterNames[solfege] = notes[index];
+        }
+    });
+
+    return letterNames;
 }
+
 
 // Generate color mappings for a specific key (colors stay tied to letter names)
 function generateColorsForScale(keyName, scaleName) {
@@ -109,16 +220,14 @@ function generateColorsForScale(keyName, scaleName) {
       'B': '#AF52DE'    // Purple
     };
 
-    const keyIndex = chromaticNotes.indexOf(keyName);
+    const letterNames = generateLetterNamesForScale(keyName, scaleName);
     const colors = {};
 
-    scale.solfege.forEach((solfege, index) => {
-        const noteIndex = (keyIndex + scale.intervals[index]) % 12;
-        const noteName = chromaticNotes[noteIndex];
-        // The color is based on the first character of the note name (e.g., 'C' for 'C#')
+    for (const solfege in letterNames) {
+        const noteName = letterNames[solfege];
         const noteLetter = noteName.charAt(0);
         colors[solfege] = noteLetterColors[noteLetter];
-    });
+    }
 
     return colors;
 }
@@ -200,12 +309,18 @@ let accordionCollapsed = true; // Start collapsed on mobile
 
 // Map to identify if a note is flat or sharp
 const noteAccidentalMap = {
-  'C': false, 'C#': 'sharp', 'Db': 'flat',
-  'D': false, 'D#': 'sharp', 'Eb': 'flat',
-  'E': false, 'F': false, 'F#': 'sharp',
-  'Gb': 'flat', 'G': false, 'G#': 'sharp',
-  'Ab': 'flat', 'A': false, 'A#': 'sharp',
-  'Bb': 'flat', 'B': false, 'Cb': 'flat'
+  'C': false, 'C#': 'sharp', 'Db': 'flat', 'D♭': 'flat',
+  'D': false, 'D#': 'sharp', 'Eb': 'flat', 'E♭': 'flat',
+  'E': false, 'E#': 'sharp', 'Fb': 'flat', 'F♭': 'flat',
+  'F': false, 'F#': 'sharp', 'Gb': 'flat', 'G♭': 'flat',
+  'G': false, 'G#': 'sharp', 'Ab': 'flat', 'A♭': 'flat',
+  'A': false, 'A#': 'sharp', 'Bb': 'flat', 'B♭': 'flat',
+  'B': false, 'B#': 'sharp', 'Cb': 'flat', 'C♭': 'flat',
+  // Double flats and sharps
+  'Cbb': 'double-flat', 'Dbb': 'double-flat', 'Ebb': 'double-flat', 'Fbb': 'double-flat', 'Gbb': 'double-flat', 'Abb': 'double-flat', 'Bbb': 'double-flat',
+  'C♭♭': 'double-flat', 'D♭♭': 'double-flat', 'E♭♭': 'double-flat', 'F♭♭': 'double-flat', 'G♭♭': 'double-flat', 'A♭♭': 'double-flat', 'B♭♭': 'double-flat',
+  'Cx': 'double-sharp', 'Dx': 'double-sharp', 'Ex': 'double-sharp', 'Fx': 'double-sharp', 'Gx': 'double-sharp', 'Ax': 'double-sharp', 'Bx': 'double-sharp',
+  'C♯♯': 'double-sharp', 'D♯♯': 'double-sharp', 'E♯♯': 'double-sharp', 'F♯♯': 'double-sharp', 'G♯♯': 'double-sharp', 'A♯♯': 'double-sharp', 'B♯♯': 'double-sharp',
 };
 
 // Keyboard mappings (expanded to include new solfege syllables)
@@ -634,9 +749,9 @@ function updateBoxNames() {
       
       const noteValue = letterNamesByKey[currentKey] && letterNamesByKey[currentKey][currentSolfege];
 
-      if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
+      if (noteValue && (noteAccidentalMap[noteValue] === 'flat' || noteAccidentalMap[noteValue] === 'double-flat')) {
         div.style.color = DARK_BLUE;
-      } else if (noteValue && noteAccidentalMap[noteValue] === 'sharp') {
+      } else if (noteValue && (noteAccidentalMap[noteValue] === 'sharp' || noteAccidentalMap[noteValue] === 'double-sharp')) {
         div.style.color = DARK_RED;
       } else {
         div.style.color = 'white';
@@ -648,9 +763,9 @@ function updateBoxNames() {
       const noteValue = letterNamesByKey[currentKey] && letterNamesByKey[currentKey][currentSolfege];
       div.textContent = noteValue || currentSolfege;
 
-      if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
+      if (noteValue && (noteAccidentalMap[noteValue] === 'flat' || noteAccidentalMap[noteValue] === 'double-flat')) {
         div.style.color = DARK_BLUE;
-      } else if (noteValue && noteAccidentalMap[noteValue] === 'sharp') {
+      } else if (noteValue && (noteAccidentalMap[noteValue] === 'sharp' || noteAccidentalMap[noteValue] === 'double-sharp')) {
         div.style.color = DARK_RED;
       } else {
         div.style.color = 'white';
@@ -765,6 +880,11 @@ function setupControlEvents() {
   // Scale dropdown change handler
   document.getElementById("scale-select").onchange = (e) => {
     currentScale = e.target.value;
+    // Find the scale key from the selected option's value
+    const selectedScaleKey = e.target.value;
+    // A bit of a workaround if the dropdown value doesn't exactly match the scale key
+    const scaleKey = Object.keys(scaleDefinitions).find(key => key === selectedScaleKey) || 'major';
+    currentScale = scaleKey;
     updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
@@ -1062,10 +1182,10 @@ function updateSolfegeColors() {
       if (!keyboardButtonActive) {
         const noteValue = letterNamesByKey[currentKey] && letterNamesByKey[currentKey][currentSolfege];
 
-        if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
-          div.style.color = DARK_BLUE;
-        } else if (noteValue && noteAccidentalMap[noteValue] === 'sharp') {
-          div.style.color = DARK_RED;
+        if (noteValue && (noteAccidentalMap[noteValue] === 'flat' || noteAccidentalMap[noteValue] === 'double-flat')) {
+            div.style.color = DARK_BLUE;
+        } else if (noteValue && (noteAccidentalMap[noteValue] === 'sharp' || noteAccidentalMap[noteValue] === 'double-sharp')) {
+            div.style.color = DARK_RED;
         } else {
           div.style.color = 'white';
         }

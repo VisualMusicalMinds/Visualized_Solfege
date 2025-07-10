@@ -239,7 +239,7 @@ function generateColorsForScale(keyName, scaleName) {
       'D': '#FF9500',   // Orange
       'E': '#FFCC00',   // Yellow
       'F': '#34C759',   // Green
-      'G': '#5af5fa',   // Turquoise
+      'G': '#30c0c6',   // Darker Turquoise
       'A': '#007AFF',   // Blue
       'B': '#AF52DE'    // Purple
     };

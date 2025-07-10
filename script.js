@@ -532,7 +532,14 @@ function createControlsBar() {
   keyButton.className = 'control-area';
   keyButton.tabIndex = 0;
   keyButton.setAttribute('aria-label', 'Key control');
-  keyButton.innerHTML = '<div class="arrow" id="key-left">&#9664;</div><div id="key-name">C Major</div><div class="arrow" id="key-right">&#9654;</div>';
+  keyButton.innerHTML = '<div class="arrow" id="key-left">&#9664;</div><div id="key-name">C</div><div class="arrow" id="key-right">&#9654;</div>';
+
+  // Scale control
+  const scaleControl = document.createElement('div');
+  scaleControl.className = 'control-area scale-control';
+  scaleControl.tabIndex = 0;
+  scaleControl.setAttribute('aria-label', 'Scale control');
+  scaleControl.innerHTML = '<select id="scale-select" class="scale-dropdown"><option value="major" selected>Major</option></select>';
 
   // Waveform control
   const waveButton = document.createElement('div');
@@ -563,6 +570,7 @@ function createControlsBar() {
 
   // Add controls to container
   controlsContainer.appendChild(keyButton);
+  controlsContainer.appendChild(scaleControl);
   controlsContainer.appendChild(waveButton);
   controlsContainer.appendChild(volumeControl);
   controlsContainer.appendChild(keyboardButton);
@@ -571,7 +579,7 @@ function createControlsBar() {
   controlsBar.appendChild(accordionToggle);
   controlsBar.appendChild(controlsContainer);
 
-  return { keyButton, waveButton, volumeControl, keyboardButton };
+  return { keyButton, scaleControl, waveButton, volumeControl, keyboardButton };
 }
 
 function updateKeyboardButton() {
@@ -590,7 +598,7 @@ function updateKeyboardButton() {
 function setupControlEvents() {
   document.getElementById("key-left").onclick = () => {
     currentKeyIndex = (currentKeyIndex - 1 + keyNames.length) % keyNames.length;
-    document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
+    document.getElementById("key-name").textContent = keyNames[currentKeyIndex];
     updateTransposedFrequencies();
     updateSolfegeColors();
     updateBoxNames();
@@ -598,7 +606,7 @@ function setupControlEvents() {
   
   document.getElementById("key-right").onclick = () => {
     currentKeyIndex = (currentKeyIndex + 1) % keyNames.length;
-    document.getElementById("key-name").textContent = keyNames[currentKeyIndex] + ' Major';
+    document.getElementById("key-name").textContent = keyNames[currentKeyIndex];
     updateTransposedFrequencies();
     updateSolfegeColors();
     updateBoxNames();

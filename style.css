@@ -140,6 +140,22 @@ html, body, #app-wrapper, .main-content {
   cursor: pointer;
 }
 
+.scale-control {
+  padding: 0.3em 0.5em;
+}
+
+.scale-dropdown {
+  background: transparent;
+  border: none;
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  margin: 0;
+}
+
 .control-area.selected {
   box-shadow: 0 0 0 0.6vmin #444a, 0 1px 8px #0002;
   background: #ffff;

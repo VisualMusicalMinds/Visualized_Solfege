@@ -19,10 +19,98 @@ let globalVolume = 0.4;
 
 const keyNames = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 let currentKeyIndex = 0;
+let currentScale = 'major';
+
+// Scale definitions with interval patterns and solfege mappings
+const scaleDefinitions = {
+  'major': {
+    name: 'Major',
+    intervals: [0, 2, 4, 5, 7, 9, 11], // W-W-H-W-W-W-H
+    solfege: ['Do', 'Re', 'Mi', 'Fa', 'So', 'La', 'Ti']
+  },
+  'natural-minor': {
+    name: 'Natural Minor',
+    intervals: [0, 2, 3, 5, 7, 8, 10], // W-H-W-W-H-W-W
+    solfege: ['Do', 'Re', 'Me', 'Fa', 'So', 'Le', 'Te']
+  },
+  'harmonic-minor': {
+    name: 'Harmonic Minor',
+    intervals: [0, 2, 3, 5, 7, 8, 11], // W-H-W-W-H-W+H-H
+    solfege: ['Do', 'Re', 'Me', 'Fa', 'So', 'Le', 'Ti']
+  },
+  'melodic-minor': {
+    name: 'Melodic Minor',
+    intervals: [0, 2, 3, 5, 7, 9, 11], // W-H-W-W-W-W-H
+    solfege: ['Do', 'Re', 'Me', 'Fa', 'So', 'La', 'Ti']
+  },
+  'dorian': {
+    name: 'Dorian Mode',
+    intervals: [0, 2, 3, 5, 7, 9, 10], // W-H-W-W-W-H-W
+    solfege: ['Do', 'Re', 'Me', 'Fa', 'So', 'La', 'Te']
+  },
+  'phrygian': {
+    name: 'Phrygian Mode',
+    intervals: [0, 1, 3, 5, 7, 8, 10], // H-W-W-W-H-W-W
+    solfege: ['Do', 'Ra', 'Me', 'Fa', 'So', 'Le', 'Te']
+  },
+  'lydian': {
+    name: 'Lydian Mode',
+    intervals: [0, 2, 4, 6, 7, 9, 11], // W-W-W-H-W-W-H
+    solfege: ['Do', 'Re', 'Mi', 'Fi', 'So', 'La', 'Ti']
+  },
+  'mixolydian': {
+    name: 'Mixolydian Mode',
+    intervals: [0, 2, 4, 5, 7, 9, 10], // W-W-H-W-W-H-W
+    solfege: ['Do', 'Re', 'Mi', 'Fa', 'So', 'La', 'Te']
+  },
+  'locrian': {
+    name: 'Locrian Mode',
+    intervals: [0, 1, 3, 5, 6, 8, 10], // H-W-W-H-W-W-W
+    solfege: ['Do', 'Ra', 'Me', 'Fa', 'Se', 'Le', 'Te']
+  }
+};
 
 // Define colors for sharp and flat notes
 const DARK_RED = '#990000';
 const DARK_BLUE = '#000099';
+
+// Helper function to get note names in chromatic order
+const chromaticNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+// Generate letter names for a specific key and scale
+function generateLetterNamesForScale(keyName, scaleName) {
+  const scale = scaleDefinitions[scaleName];
+  if (!scale) return {};
+  
+  const keyIndex = chromaticNotes.indexOf(keyName);
+  const letterNames = {};
+  
+  scale.solfege.forEach((solfege, index) => {
+    const noteIndex = (keyIndex + scale.intervals[index]) % 12;
+    letterNames[solfege] = chromaticNotes[noteIndex];
+  });
+  
+  return letterNames;
+}
+
+// Generate color mappings for a specific key (colors stay tied to letter names)
+function generateColorsForScale(keyName, scaleName) {
+  const scale = scaleDefinitions[scaleName];
+  if (!scale) return {};
+  
+  // Base color mapping tied to chromatic scale positions
+  const baseColors = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#5af5fa', '#007AFF', '#AF52DE', 
+                     '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#5af5fa'];
+  const keyIndex = chromaticNotes.indexOf(keyName);
+  const colors = {};
+  
+  scale.solfege.forEach((solfege, index) => {
+    const noteIndex = (keyIndex + scale.intervals[index]) % 12;
+    colors[solfege] = baseColors[noteIndex % 7]; // Cycle through 7 colors
+  });
+  
+  return colors;
+}
 
 // Base frequencies
 const baseFrequencies = {
@@ -47,42 +135,28 @@ function updateTransposedFrequencies() {
   }
 }
 
-// Color mappings by key
-const noteColorsByKey = {
-  'C': { 'Do': '#FF3B30', 'Re': '#FF9500', 'Mi': '#FFCC00', 'Fa': '#34C759', 'So': '#5af5fa', 'La': '#007AFF', 'Ti': '#AF52DE' },
-  'Db': { 'Do': '#FF9500', 'Re': '#FFCC00', 'Mi': '#34C759', 'Fa': '#5af5fa', 'So': '#007AFF', 'La': '#AF52DE', 'Ti': '#FF3B30' },
-  'D': { 'Do': '#FF9500', 'Re': '#FFCC00', 'Mi': '#34C759', 'Fa': '#5af5fa', 'So': '#007AFF', 'La': '#AF52DE', 'Ti': '#FF3B30' },
-  'Eb': { 'Do': '#FFCC00', 'Re': '#34C759', 'Mi': '#5af5fa', 'Fa': '#007AFF', 'So': '#AF52DE', 'La': '#FF3B30', 'Ti': '#FF9500' },
-  'E': { 'Do': '#FFCC00', 'Re': '#34C759', 'Mi': '#5af5fa', 'Fa': '#007AFF', 'So': '#AF52DE', 'La': '#FF3B30', 'Ti': '#FF9500' },
-  'F': { 'Do': '#34C759', 'Re': '#5af5fa', 'Mi': '#007AFF', 'Fa': '#AF52DE', 'So': '#FF3B30', 'La': '#FF9500', 'Ti': '#FFCC00' },
-  'Gb': { 'Do': '#5af5fa', 'Re': '#007AFF', 'Mi': '#AF52DE', 'Fa': '#FF3B30', 'So': '#FF9500', 'La': '#FFCC00', 'Ti': '#34C759' },
-  'G': { 'Do': '#5af5fa', 'Re': '#007AFF', 'Mi': '#AF52DE', 'Fa': '#FF3B30', 'So': '#FF9500', 'La': '#FFCC00', 'Ti': '#34C759' },
-  'Ab': { 'Do': '#007AFF', 'Re': '#AF52DE', 'Mi': '#FF3B30', 'Fa': '#FF9500', 'So': '#FFCC00', 'La': '#34C759', 'Ti': '#5af5fa' },
-  'A': { 'Do': '#007AFF', 'Re': '#AF52DE', 'Mi': '#FF3B30', 'Fa': '#FF9500', 'So': '#FFCC00', 'La': '#34C759', 'Ti': '#5af5fa' },
-  'Bb': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' },
-  'B': { 'Do': '#AF52DE', 'Re': '#FF3B30', 'Mi': '#FF9500', 'Fa': '#FFCC00', 'So': '#34C759', 'La': '#5af5fa', 'Ti': '#007AFF' }
-};
+// Dynamic color and letter name mappings (generated based on current key and scale)
+let noteColorsByKey = {};
+let letterNamesByKey = {};
+
+// Function to update mappings when key or scale changes
+function updateScaleMappings() {
+  const currentKey = keyNames[currentKeyIndex];
+  
+  // Generate new mappings for all keys with current scale
+  noteColorsByKey = {};
+  letterNamesByKey = {};
+  
+  keyNames.forEach(key => {
+    letterNamesByKey[key] = generateLetterNamesForScale(key, currentScale);
+    noteColorsByKey[key] = generateColorsForScale(key, currentScale);
+  });
+}
 
 // UI state
 let cButtonState = 'note'; // can be 'note' or 'S'
 let keyboardButtonActive = false;
 let accordionCollapsed = true; // Start collapsed on mobile
-
-// Letter names by key
-const letterNamesByKey = {
-  'C':  { 'Do': 'C',  'Re': 'D',  'Mi': 'E',  'Fa': 'F',  'So': 'G',  'La': 'A',  'Ti': 'B' },
-  'Db': { 'Do': 'Db', 'Re': 'Eb', 'Mi': 'F',  'Fa': 'Gb', 'So': 'Ab', 'La': 'Bb', 'Ti': 'C' },
-  'D':  { 'Do': 'D',  'Re': 'E',  'Mi': 'F#', 'Fa': 'G',  'So': 'A',  'La': 'B',  'Ti': 'C#' },
-  'Eb': { 'Do': 'Eb', 'Re': 'F',  'Mi': 'G',  'Fa': 'Ab', 'So': 'Bb', 'La': 'C',  'Ti': 'D' },
-  'E':  { 'Do': 'E',  'Re': 'F#', 'Mi': 'G#', 'Fa': 'A',  'So': 'B',  'La': 'C#', 'Ti': 'D#' },
-  'F':  { 'Do': 'F',  'Re': 'G',  'Mi': 'A',  'Fa': 'Bb', 'So': 'C',  'La': 'D',  'Ti': 'E' },
-  'Gb': { 'Do': 'Gb', 'Re': 'Ab', 'Mi': 'Bb', 'Fa': 'Cb', 'So': 'Db', 'La': 'Eb', 'Ti': 'F' },
-  'G':  { 'Do': 'G',  'Re': 'A',  'Mi': 'B',  'Fa': 'C',  'So': 'D',  'La': 'E',  'Ti': 'F#' },
-  'Ab': { 'Do': 'Ab', 'Re': 'Bb', 'Mi': 'C',  'Fa': 'Db', 'So': 'Eb', 'La': 'F',  'Ti': 'G' },
-  'A':  { 'Do': 'A',  'Re': 'B',  'Mi': 'C#', 'Fa': 'D',  'So': 'E',  'La': 'F#', 'Ti': 'G#' },
-  'Bb': { 'Do': 'Bb', 'Re': 'C',  'Mi': 'D',  'Fa': 'Eb', 'So': 'F',  'La': 'G',  'Ti': 'A' },
-  'B':  { 'Do': 'B',  'Re': 'C#', 'Mi': 'D#', 'Fa': 'E',  'So': 'F#', 'La': 'G#', 'Ti': 'A#' }
-};
 
 // Map to identify if a note is flat or sharp
 const noteAccidentalMap = {
@@ -94,24 +168,40 @@ const noteAccidentalMap = {
   'Bb': 'flat', 'B': false, 'Cb': 'flat'
 };
 
-// Keyboard mappings
+// Keyboard mappings (expanded to include new solfege syllables)
 const buttonSolfegeNames = {
   'f': 'Fa', 'q': 'So', 'd': 'Mi', 's': 'Re', 'a': 'Do', 'x': 'La', 'c': 'Ti',
   'z': 'So', 'w': 'La', 'e': 'Ti', '1': 'Do', '2': 'Re', '3': 'Mi',
   ';': 'Fa', 'm': 'So', 'l': 'Mi', 'k': 'Re', 'j': 'Do', ',': 'La', '.': 'Ti',
   'u': 'So', 'i': 'La', 'o': 'Ti', '7': 'Do', '8': 'Re', '9': 'Mi',
-  'y': 'Fa', 'h': 'Ti', '/': 'Do', 'p': 'Do', '6': 'Ti', '0': 'Fa'
+  'y': 'Fa', 'h': 'Ti', '/': 'Do', 'p': 'Do', '6': 'Ti', '0': 'Fa',
+  // New mappings for alternative solfege syllables will be handled dynamically
 };
 
-// Keyboard display pairs for display in keyboard mode
+// Function to get current solfege syllable for a key based on current scale
+function getCurrentSolfege(key) {
+  const baseSolfege = buttonSolfegeNames[key];
+  if (!baseSolfege) return null;
+  
+  const scale = scaleDefinitions[currentScale];
+  if (!scale) return baseSolfege;
+  
+  // Map major scale positions to current scale positions
+  const majorSolfege = ['Do', 'Re', 'Mi', 'Fa', 'So', 'La', 'Ti'];
+  const majorIndex = majorSolfege.indexOf(baseSolfege);
+  
+  if (majorIndex !== -1 && scale.solfege[majorIndex]) {
+    return scale.solfege[majorIndex];
+  }
+  
+  return baseSolfege;
+}
+
+// Keyboard display pairs for display in keyboard mode (expanded for new syllables)
 const keyboardDisplayPairs = {
-  'Fa': 'f | ;',
-  'Mi': 'd | l',
-  'Re': 's | k',
-  'Do': 'a | j',
-  'Ti': 'c | .',
-  'La': 'x | ,',
-  'So': 'z | m'
+  'Fa': 'f | ;', 'Mi': 'd | l', 'Re': 's | k', 'Do': 'a | j', 'Ti': 'c | .', 'La': 'x | ,', 'So': 'z | m',
+  // Additional syllables
+  'Me': 'd | l', 'Le': 'x | ,', 'Te': 'c | .', 'Ra': 's | k', 'Fi': 'f | ;', 'Se': 'z | m'
 };
 
 const keyboardDisplayPairsWithPosition = {
@@ -480,15 +570,19 @@ function updateBoxNames() {
       if (keyboardDisplayPairsWithPosition[keyPosition]) {
         kbText = keyboardDisplayPairsWithPosition[keyPosition];
       } else {
-        kbText = keyboardDisplayPairs[btn.name] || '';
+        // Use the current solfege syllable for this button
+        const currentSolfege = getCurrentSolfege(btn.keys[0]);
+        kbText = keyboardDisplayPairs[currentSolfege] || '';
       }
       div.innerHTML = `<span class="keybinding-text">${kbText}</span>`;
       div.style.color = 'white';
     }
     else if (cButtonState === 'note') {
-      div.textContent = buttonSolfegeNames[btn.keys[0]] || btn.name;
-      const solfege = buttonSolfegeNames[btn.keys[0]] || btn.name;
-      const noteValue = letterNamesByKey[currentKey][solfege];
+      // Get the current solfege syllable for this scale
+      const currentSolfege = getCurrentSolfege(btn.keys[0]);
+      div.textContent = currentSolfege || btn.name;
+      
+      const noteValue = letterNamesByKey[currentKey] && letterNamesByKey[currentKey][currentSolfege];
 
       if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
         div.style.color = DARK_BLUE;
@@ -499,9 +593,10 @@ function updateBoxNames() {
       }
     }
     else {
-      const solfege = buttonSolfegeNames[btn.keys[0]] || btn.name;
-      const noteValue = letterNamesByKey[currentKey][solfege];
-      div.textContent = noteValue || solfege;
+      // Show letter names
+      const currentSolfege = getCurrentSolfege(btn.keys[0]);
+      const noteValue = letterNamesByKey[currentKey] && letterNamesByKey[currentKey][currentSolfege];
+      div.textContent = noteValue || currentSolfege;
 
       if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
         div.style.color = DARK_BLUE;
@@ -539,7 +634,12 @@ function createControlsBar() {
   scaleControl.className = 'control-area scale-control';
   scaleControl.tabIndex = 0;
   scaleControl.setAttribute('aria-label', 'Scale control');
-  scaleControl.innerHTML = '<select id="scale-select" class="scale-dropdown"><option value="major" selected>Major</option></select>';
+  
+  // Create scale dropdown with all scales
+  const scaleOptions = Object.entries(scaleDefinitions)
+    .map(([key, scale]) => `<option value="${key}" ${key === currentScale ? 'selected' : ''}>${scale.name}</option>`)
+    .join('');
+  scaleControl.innerHTML = `<select id="scale-select" class="scale-dropdown">${scaleOptions}</select>`;
 
   // Waveform control
   const waveButton = document.createElement('div');
@@ -600,6 +700,7 @@ function setupControlEvents() {
     currentKeyIndex = (currentKeyIndex - 1 + keyNames.length) % keyNames.length;
     document.getElementById("key-name").textContent = keyNames[currentKeyIndex];
     updateTransposedFrequencies();
+    updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
   };
@@ -608,6 +709,15 @@ function setupControlEvents() {
     currentKeyIndex = (currentKeyIndex + 1) % keyNames.length;
     document.getElementById("key-name").textContent = keyNames[currentKeyIndex];
     updateTransposedFrequencies();
+    updateScaleMappings();
+    updateSolfegeColors();
+    updateBoxNames();
+  };
+  
+  // Scale dropdown change handler
+  document.getElementById("scale-select").onchange = (e) => {
+    currentScale = e.target.value;
+    updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
   };
@@ -649,10 +759,17 @@ function renderButtons() {
 
     const div = document.createElement('div');
     div.className = 'note-button';
-    div.textContent = btn.name;
+    
+    // Get the current solfege syllable for this button
+    const currentSolfege = getCurrentSolfege(btn.keys[0]);
+    div.textContent = currentSolfege || btn.name;
+    
     div.style.outline = 'none';
     div.setAttribute('data-keys', btn.keys.join(','));
-    const color = noteColorsByKey[keyNames[currentKeyIndex]][btn.name] || '#ccc';
+    
+    // Get color from current mappings
+    const currentKey = keyNames[currentKeyIndex];
+    const color = (noteColorsByKey[currentKey] && noteColorsByKey[currentKey][currentSolfege]) || '#ccc';
     div.style.backgroundColor = color;
     
     const rows = [...new Set(btn.cells.map(c => positions[c][0]))];
@@ -887,11 +1004,15 @@ function updateSolfegeColors() {
   buttons.forEach(btn => {
     const div = keyToDiv[btn.keys[0]];
     if (div) {
-      if (bgColors[btn.name]) div.style.backgroundColor = bgColors[btn.name];
+      // Get the current solfege syllable for this button and scale
+      const currentSolfege = getCurrentSolfege(btn.keys[0]);
+      
+      if (bgColors && bgColors[currentSolfege]) {
+        div.style.backgroundColor = bgColors[currentSolfege];
+      }
 
       if (!keyboardButtonActive) {
-        const solfege = btn.name;
-        const noteValue = letterNamesByKey[currentKey][solfege];
+        const noteValue = letterNamesByKey[currentKey] && letterNamesByKey[currentKey][currentSolfege];
 
         if (noteValue && noteAccidentalMap[noteValue] === 'flat') {
           div.style.color = DARK_BLUE;
@@ -965,6 +1086,7 @@ function initialize() {
   
   setTimeout(() => { 
     resizeGrid(); 
+    updateScaleMappings();
     updateSolfegeColors(); 
     updateBoxNames(); 
     updateAccordionState(); // Initialize accordion state
@@ -978,6 +1100,7 @@ function initialize() {
   });
 
   // Initial setup
+  updateScaleMappings(); // Initialize scale mappings first
   updateTransposedFrequencies();
   updateSolfegeColors();
   updateBoxNames();

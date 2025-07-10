@@ -384,20 +384,20 @@ const keyboardDisplayPairs = {
 };
 
 const keyboardDisplayPairsWithPosition = {
-  'mid_Fa': 'f | ;',  'mid_Mi': 'd | l',  'mid_Re': 's | k',  'mid_Do': 'a | j',
+  'mid_Fa': 'f | ;',  'mid_Mi': 'd | l',  'mid_Re': 's | k',  'mid_Do': 'a | j | v',
   'low_Ti': 'c | .', 'low_La': 'x | ,', 'low_So': 'z | m',
   'high_So': 'q | u', 'high_La': 'w | i', 'high_Ti': 'e | o',
-  'higher_Do': '1 | 7', 'higher_Re': '2 | 8', 'higher_Mi': '3 | 9',
-  'highest_Fa': '0'
+  'higher_Do': '1 | 7 | r', 'higher_Re': '2 | 8', 'higher_Mi': '3 | 9',
+  'highest_Fa': '0 | 4'
 };
 
 // Map button keys to which note they represent (grouped by note position)
 const keyGroups = {
   'low_So': ['z', 'm'], 'low_La': ['x', ','], 'low_Ti': ['c', '.', 'h'],
-  'mid_Do': ['a', 'j', '/'], 'mid_Re': ['s', 'k'], 'mid_Mi': ['d', 'l'], 'mid_Fa': ['f', ';', 'y'],
+  'mid_Do': ['a', 'j', '/', 'v'], 'mid_Re': ['s', 'k'], 'mid_Mi': ['d', 'l'], 'mid_Fa': ['f', ';', 'y'],
   'high_So': ['q', 'u'], 'high_La': ['w', 'i'], 'high_Ti': ['e', 'o', '6'],
-  'higher_Do': ['1', '7', 'p'], 'higher_Re': ['2', '8'], 'higher_Mi': ['3', '9'],
-  'highest_Fa': ['0']
+  'higher_Do': ['1', '7', 'p', 'r'], 'higher_Re': ['2', '8'], 'higher_Mi': ['3', '9'],
+  'highest_Fa': ['0', '4']
 };
 
 // Map to find the position group for a key
@@ -594,16 +594,16 @@ const buttons = [
   { name: 'So', keys: ['z', 'm'], note: 'G3', cells: ['9b','9c'] },
   { name: 'Mi', keys: ['d', 'l'], note: 'E4', cells: ['5a'] },
   { name: 'Re', keys: ['s', 'k'], note: 'D4', cells: ['6a'] },
-  { name: 'Do', keys: ['a', 'j', '/'], note: 'C4', cells: ['5b','6b','7b','5c','6c','7c'] },
+  { name: 'Do', keys: ['a', 'j', '/', 'v'], note: 'C4', cells: ['5b','6b','7b','5c','6c','7c'] },
   { name: 'La', keys: ['x', ','], note: 'A3', cells: ['8b'] },
   { name: 'Ti', keys: ['c', '.', 'h'], note: 'B3', cells: ['8c'] },
   { name: 'So', keys: ['q', 'u'], note: 'G4', cells: ['3b','4b','3c','4c'] },
   { name: 'La', keys: ['w', 'i'], note: 'A4', cells: ['4d'] },
   { name: 'Ti', keys: ['e', 'o', '6'], note: 'B4', cells: ['3d'] },
-  { name: 'Do', keys: ['1', '7', 'p'], note: 'C5', cells: ['2c','2d'] },
+  { name: 'Do', keys: ['1', '7', 'p', 'r'], note: 'C5', cells: ['2c','2d'] },
   { name: 'Re', keys: ['2', '8'], note: 'D5', cells: ['1c'] },
   { name: 'Mi', keys: ['3', '9'], note: 'E5', cells: ['1d'] },
-  { name: 'Fa', keys: ['0'], note: 'F5', cells: [] }
+  { name: 'Fa', keys: ['0', '4'], note: 'F5', cells: [] }
 ];
 
 // DOM references

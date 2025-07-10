@@ -123,28 +123,54 @@ function generateColorsForScale(keyName, scaleName) {
     return colors;
 }
 
-// Base frequencies
+// Base frequencies for C Major scale (anchor for calculations)
 const baseFrequencies = {
-  'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
-  'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
-  'F5': 698.46
+    'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+    'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
+    'F5': 698.46
 };
-let noteFrequencies = { ...baseFrequencies };
 
-// Transposition logic
-const semitoneShiftMap = {'C':0,'Db':1,'D':2,'Eb':3,'E':4,'F':5,'Gb':6,'G':-5,'Ab':-4,'A':-3,'Bb':-2,'B':-1};
+// This will hold the currently active frequencies for the selected key and scale
+let noteFrequencies = {};
 
-function transposeFrequency(freq, semitoneShift) {
-  return freq * Math.pow(2, semitoneShift / 12);
+// Function to calculate and update note frequencies for the current key and scale
+function updateNoteFrequencies() {
+    const keyIndex = currentKeyIndex; // 0 for C, 1 for Db, etc.
+    const rootFrequency = 261.63 * Math.pow(2, keyIndex / 12); // C4 as the base
+    const scale = scaleDefinitions[currentScale];
+
+    const scaleFrequencies = {};
+    scale.intervals.forEach((interval, i) => {
+        const solfege = scale.solfege[i];
+        scaleFrequencies[solfege] = rootFrequency * Math.pow(2, interval / 12);
+    });
+
+    // Map the calculated scale frequencies to the keyboard layout
+    noteFrequencies = {
+        'C4': scaleFrequencies['Do'],
+        'D4': scaleFrequencies['Re'],
+        'E4': scaleFrequencies['Mi'] || scaleFrequencies['Me'],
+        'F4': scaleFrequencies['Fa'] || scaleFrequencies['Fi'],
+        'G4': scaleFrequencies['So'] || scaleFrequencies['Se'],
+        'A4': scaleFrequencies['La'] || scaleFrequencies['Le'],
+        'B4': scaleFrequencies['Ti'] || scaleFrequencies['Te'],
+        // Octaves and other notes
+        'G3': (scaleFrequencies['So'] || scaleFrequencies['Se']) / 2,
+        'A3': (scaleFrequencies['La'] || scaleFrequencies['Le']) / 2,
+        'B3': (scaleFrequencies['Ti'] || scaleFrequencies['Te']) / 2,
+        'C5': scaleFrequencies['Do'] * 2,
+        'D5': scaleFrequencies['Re'] * 2,
+        'E5': (scaleFrequencies['Mi'] || scaleFrequencies['Me']) * 2,
+        'F5': (scaleFrequencies['Fa'] || scaleFrequencies['Fi']) * 2,
+    };
+
+    // Handle Phrygian 'Ra' which replaces 'Re'
+    if (currentScale === 'phrygian' || currentScale === 'locrian') {
+        noteFrequencies['D4'] = scaleFrequencies['Ra'];
+        noteFrequencies['D5'] = scaleFrequencies['Ra'] * 2;
+    }
 }
 
-function updateTransposedFrequencies() {
-  const shift = semitoneShiftMap[keyNames[currentKeyIndex]];
-  noteFrequencies = {};
-  for (const [note, freq] of Object.entries(baseFrequencies)) {
-    noteFrequencies[note] = transposeFrequency(freq, shift);
-  }
-}
 
 // Dynamic color and letter name mappings (generated based on on current key and scale)
 let noteColorsByKey = {};
@@ -162,6 +188,9 @@ function updateScaleMappings() {
     letterNamesByKey[key] = generateLetterNamesForScale(key, currentScale);
     noteColorsByKey[key] = generateColorsForScale(key, currentScale);
   });
+
+  // Also update the frequencies whenever the scale or key changes
+  updateNoteFrequencies();
 }
 
 // UI state
@@ -372,6 +401,13 @@ function handlePlayKey(key) {
   heldNoteKeys.add(key);
   const accidental = getAccidentalShift();
   const oscKey = `${key}_${accidental}`;
+  
+  // Ensure noteFrequencies has been calculated
+  if (!noteFrequencies[btn.note]) {
+      console.warn(`Frequency for note ${btn.note} not found.`);
+      return;
+  }
+  
   const freq = noteFrequencies[btn.note] * Math.pow(2, accidental / 12);
   startNote(oscKey, freq);
 }
@@ -392,6 +428,9 @@ function reTriggerHeldKeysAccidentals() {
     if (!btn) continue;
     const accidental = getAccidentalShift();
     const oscKey = `${key}_${accidental}`;
+    
+    if (!noteFrequencies[btn.note]) continue;
+
     const freq = noteFrequencies[btn.note] * Math.pow(2, accidental / 12);
     startNote(oscKey, freq);
   }
@@ -710,7 +749,6 @@ function setupControlEvents() {
   document.getElementById("key-left").onclick = () => {
     currentKeyIndex = (currentKeyIndex - 1 + keyNames.length) % keyNames.length;
     document.getElementById("key-name").textContent = keyNames[currentKeyIndex];
-    updateTransposedFrequencies();
     updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
@@ -719,7 +757,6 @@ function setupControlEvents() {
   document.getElementById("key-right").onclick = () => {
     currentKeyIndex = (currentKeyIndex + 1) % keyNames.length;
     document.getElementById("key-name").textContent = keyNames[currentKeyIndex];
-    updateTransposedFrequencies();
     updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
@@ -1112,7 +1149,6 @@ function initialize() {
 
   // Initial setup
   updateScaleMappings(); // Initialize scale mappings first
-  updateTransposedFrequencies();
   updateSolfegeColors();
   updateBoxNames();
 }

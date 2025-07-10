@@ -114,6 +114,7 @@ html, body, #app-wrapper, .main-content {
   z-index: 1;
   font-family: 'EB Garamond', Garamond, 'Times New Roman', Times, serif;
   letter-spacing: 0.02em;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }
 
 .note-button { 

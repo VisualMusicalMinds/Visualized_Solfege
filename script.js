@@ -95,21 +95,32 @@ function generateLetterNamesForScale(keyName, scaleName) {
 
 // Generate color mappings for a specific key (colors stay tied to letter names)
 function generateColorsForScale(keyName, scaleName) {
-  const scale = scaleDefinitions[scaleName];
-  if (!scale) return {};
-  
-  // Base color mapping tied to chromatic scale positions
-  const baseColors = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#5af5fa', '#007AFF', '#AF52DE', 
-                     '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#5af5fa'];
-  const keyIndex = chromaticNotes.indexOf(keyName);
-  const colors = {};
-  
-  scale.solfege.forEach((solfege, index) => {
-    const noteIndex = (keyIndex + scale.intervals[index]) % 12;
-    colors[solfege] = baseColors[noteIndex % 7]; // Cycle through 7 colors
-  });
-  
-  return colors;
+    const scale = scaleDefinitions[scaleName];
+    if (!scale) return {};
+
+    // Base color mapping tied to the 7 note letters (C, D, E, F, G, A, B)
+    const noteLetterColors = {
+      'C': '#FF3B30',   // Red
+      'D': '#FF9500',   // Orange
+      'E': '#FFCC00',   // Yellow
+      'F': '#34C759',   // Green
+      'G': '#5af5fa',   // Turquoise
+      'A': '#007AFF',   // Blue
+      'B': '#AF52DE'    // Purple
+    };
+
+    const keyIndex = chromaticNotes.indexOf(keyName);
+    const colors = {};
+
+    scale.solfege.forEach((solfege, index) => {
+        const noteIndex = (keyIndex + scale.intervals[index]) % 12;
+        const noteName = chromaticNotes[noteIndex];
+        // The color is based on the first character of the note name (e.g., 'C' for 'C#')
+        const noteLetter = noteName.charAt(0);
+        colors[solfege] = noteLetterColors[noteLetter];
+    });
+
+    return colors;
 }
 
 // Base frequencies
@@ -135,7 +146,7 @@ function updateTransposedFrequencies() {
   }
 }
 
-// Dynamic color and letter name mappings (generated based on current key and scale)
+// Dynamic color and letter name mappings (generated based on on current key and scale)
 let noteColorsByKey = {};
 let letterNamesByKey = {};
 

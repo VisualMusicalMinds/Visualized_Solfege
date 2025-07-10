@@ -333,13 +333,13 @@ let accordionCollapsed = true; // Start collapsed on mobile
 
 // Map to identify if a note is flat or sharp
 const noteAccidentalMap = {
-  'C': false, 'C#': 'sharp', 'Db': 'flat', 'D♭': 'flat',
-  'D': false, 'D#': 'sharp', 'Eb': 'flat', 'E♭': 'flat',
-  'E': false, 'E#': 'sharp', 'Fb': 'flat', 'F♭': 'flat',
-  'F': false, 'F#': 'sharp', 'Gb': 'flat', 'G♭': 'flat',
-  'G': false, 'G#': 'sharp', 'Ab': 'flat', 'A♭': 'flat',
-  'A': false, 'A#': 'sharp', 'Bb': 'flat', 'B♭': 'flat',
-  'B': false, 'B#': 'sharp', 'Cb': 'flat', 'C♭': 'flat',
+  'C': false, 'C#': 'sharp', 'C♯': 'sharp', 'Db': 'flat', 'D♭': 'flat',
+  'D': false, 'D#': 'sharp', 'D♯': 'sharp', 'Eb': 'flat', 'E♭': 'flat',
+  'E': false, 'E#': 'sharp', 'E♯': 'sharp', 'Fb': 'flat', 'F♭': 'flat',
+  'F': false, 'F#': 'sharp', 'F♯': 'sharp', 'Gb': 'flat', 'G♭': 'flat',
+  'G': false, 'G#': 'sharp', 'G♯': 'sharp', 'Ab': 'flat', 'A♭': 'flat',
+  'A': false, 'A#': 'sharp', 'A♯': 'sharp', 'Bb': 'flat', 'B♭': 'flat',
+  'B': false, 'B#': 'sharp', 'B♯': 'sharp', 'Cb': 'flat', 'C♭': 'flat',
   // Double flats and sharps
   'Cbb': 'double-flat', 'Dbb': 'double-flat', 'Ebb': 'double-flat', 'Fbb': 'double-flat', 'Gbb': 'double-flat', 'Abb': 'double-flat', 'Bbb': 'double-flat',
   'C♭♭': 'double-flat', 'D♭♭': 'double-flat', 'E♭♭': 'double-flat', 'F♭♭': 'double-flat', 'G♭♭': 'double-flat', 'A♭♭': 'double-flat', 'B♭♭': 'double-flat',

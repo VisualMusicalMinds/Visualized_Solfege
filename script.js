@@ -78,6 +78,8 @@ const scaleSpellings = {
         'lydian': ['C', 'D', 'E', 'F♯', 'G', 'A', 'B'],
         'mixolydian': ['C', 'D', 'E', 'F', 'G', 'A', 'B♭'],
         'natural-minor': ['C', 'D', 'E♭', 'F', 'G', 'A♭', 'B♭'],
+        'harmonic-minor': ['C', 'D', 'E♭', 'F', 'G', 'A♭', 'B'],
+        'melodic-minor': ['C', 'D', 'E♭', 'F', 'G', 'A', 'B'],
         'locrian': ['C', 'D♭', 'E♭', 'F', 'G♭', 'A♭', 'B♭']
     },
     'Db': {
@@ -87,6 +89,8 @@ const scaleSpellings = {
         'lydian': ['D♭', 'E♭', 'F', 'G', 'A♭', 'B♭', 'C'],
         'mixolydian': ['D♭', 'E♭', 'F', 'G♭', 'A♭', 'B♭', 'C♭'],
         'natural-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C♭'],
+        'harmonic-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C'],
+        'melodic-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭', 'C'],
         'locrian': ['D♭', 'E♭♭', 'F♭', 'G♭♭', 'A♭♭', 'B♭♭', 'C♭']
     },
     'D': {
@@ -96,6 +100,8 @@ const scaleSpellings = {
         'lydian': ['D', 'E', 'F♯', 'G♯', 'A', 'B', 'C♯'],
         'mixolydian': ['D', 'E', 'F♯', 'G', 'A', 'B', 'C'],
         'natural-minor': ['D', 'E', 'F', 'G', 'A', 'B♭', 'C'],
+        'harmonic-minor': ['D', 'E', 'F', 'G', 'A', 'B♭', 'C♯'],
+        'melodic-minor': ['D', 'E', 'F', 'G', 'A', 'B', 'C♯'],
         'locrian': ['D', 'E♭', 'F', 'G', 'A♭', 'B♭', 'C']
     },
     'Eb': {
@@ -105,6 +111,8 @@ const scaleSpellings = {
         'lydian': ['E♭', 'F', 'G', 'A', 'B♭', 'C', 'D'],
         'mixolydian': ['E♭', 'F', 'G', 'A♭', 'B♭', 'C', 'D♭'],
         'natural-minor': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C♭', 'D♭'],
+        'harmonic-minor': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C♭', 'D'],
+        'melodic-minor': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C', 'D'],
         'locrian': ['E♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C♭', 'D♭']
     },
     'E': {
@@ -114,6 +122,8 @@ const scaleSpellings = {
         'lydian': ['E', 'F♯', 'G♯', 'A♯', 'B', 'C♯', 'D♯'],
         'mixolydian': ['E', 'F♯', 'G♯', 'A', 'B', 'C♯', 'D'],
         'natural-minor': ['E', 'F♯', 'G', 'A', 'B', 'C', 'D'],
+        'harmonic-minor': ['E', 'F♯', 'G', 'A', 'B', 'C', 'D♯'],
+        'melodic-minor': ['E', 'F♯', 'G', 'A', 'B', 'C♯', 'D♯'],
         'locrian': ['E', 'F', 'G', 'A', 'B♭', 'C', 'D']
     },
     'F': {
@@ -123,6 +133,8 @@ const scaleSpellings = {
         'lydian': ['F', 'G', 'A', 'B', 'C', 'D', 'E'],
         'mixolydian': ['F', 'G', 'A', 'B♭', 'C', 'D', 'E♭'],
         'natural-minor': ['F', 'G', 'A♭', 'B♭', 'C', 'D♭', 'E♭'],
+        'harmonic-minor': ['F', 'G', 'A♭', 'B♭', 'C', 'D♭', 'E'],
+        'melodic-minor': ['F', 'G', 'A♭', 'B♭', 'C', 'D', 'E'],
         'locrian': ['F', 'G♭', 'A♭', 'B♭', 'C♭', 'D♭', 'E♭']
     },
     'Gb': {
@@ -132,6 +144,8 @@ const scaleSpellings = {
         'lydian': ['G♭', 'A♭', 'B♭', 'C', 'D♭', 'E♭', 'F'],
         'mixolydian': ['G♭', 'A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F♭'],
         'natural-minor': ['G♭', 'A♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F♭'],
+        'harmonic-minor': ['G♭', 'A♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F'],
+        'melodic-minor': ['G♭', 'A♭', 'B♭♭', 'C♭', 'D♭', 'E♭', 'F'],
         'locrian': ['G♭', 'A♭♭', 'B♭♭', 'C♭', 'D♭♭', 'E♭♭', 'F♭']
     },
     'G': {
@@ -141,6 +155,8 @@ const scaleSpellings = {
         'lydian': ['G', 'A', 'B', 'C♯', 'D', 'E', 'F♯'],
         'mixolydian': ['G', 'A', 'B', 'C', 'D', 'E', 'F'],
         'natural-minor': ['G', 'A', 'B♭', 'C', 'D', 'E♭', 'F'],
+        'harmonic-minor': ['G', 'A', 'B♭', 'C', 'D', 'E♭', 'F♯'],
+        'melodic-minor': ['G', 'A', 'B♭', 'C', 'D', 'E', 'F♯'],
         'locrian': ['G', 'A♭', 'B♭', 'C', 'D♭', 'E♭', 'F']
     },
     'Ab': {
@@ -150,6 +166,8 @@ const scaleSpellings = {
         'lydian': ['A♭', 'B♭', 'C', 'D', 'E♭', 'F', 'G'],
         'mixolydian': ['A♭', 'B♭', 'C', 'D♭', 'E♭', 'F', 'G♭'],
         'natural-minor': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G♭'],
+        'harmonic-minor': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G'],
+        'melodic-minor': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F', 'G'],
         'locrian': ['A♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F♭', 'G♭']
     },
     'A': {
@@ -159,6 +177,8 @@ const scaleSpellings = {
         'lydian': ['A', 'B', 'C♯', 'D♯', 'E', 'F♯', 'G♯'],
         'mixolydian': ['A', 'B', 'C♯', 'D', 'E', 'F♯', 'G'],
         'natural-minor': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+        'harmonic-minor': ['A', 'B', 'C', 'D', 'E', 'F', 'G♯'],
+        'melodic-minor': ['A', 'B', 'C', 'D', 'E', 'F♯', 'G♯'],
         'locrian': ['A', 'B♭', 'C', 'D', 'E♭', 'F', 'G']
     },
     'Bb': {
@@ -168,6 +188,8 @@ const scaleSpellings = {
         'lydian': ['B♭', 'C', 'D', 'E', 'F', 'G', 'A'],
         'mixolydian': ['B♭', 'C', 'D', 'E♭', 'F', 'G', 'A♭'],
         'natural-minor': ['B♭', 'C', 'D♭', 'E♭', 'F', 'G♭', 'A♭'],
+        'harmonic-minor': ['B♭', 'C', 'D♭', 'E♭', 'F', 'G♭', 'A'],
+        'melodic-minor': ['B♭', 'C', 'D♭', 'E♭', 'F', 'G', 'A'],
         'locrian': ['B♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G♭', 'A♭']
     },
     'B': {
@@ -177,6 +199,8 @@ const scaleSpellings = {
         'lydian': ['B', 'C♯', 'D♯', 'E♯', 'F♯', 'G♯', 'A♯'],
         'mixolydian': ['B', 'C♯', 'D♯', 'E', 'F♯', 'G♯', 'A'],
         'natural-minor': ['B', 'C♯', 'D', 'E', 'F♯', 'G', 'A'],
+        'harmonic-minor': ['B', 'C♯', 'D', 'E', 'F♯', 'G', 'A♯'],
+        'melodic-minor': ['B', 'C♯', 'D', 'E', 'F♯', 'G♯', 'A♯'],
         'locrian': ['B', 'C', 'D', 'E', 'F', 'G', 'A']
     }
 };

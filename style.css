@@ -12,54 +12,29 @@ html, body, #app-wrapper, .main-content {
 .controls-bar {
   width: 100vw;
   box-sizing: border-box;
-  padding: 0.5vmin 0.5vmin 0 0.5vmin;
-  background: #faf8f0;
+  padding: 1vmin;
+  background: #001f3f; /* Default color */
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: stretch;
-  gap: 1.5vw;
-  border-bottom: 1px solid #eee;
+  align-items: flex-start;
+  gap: 1vw;
+  border-bottom: 1px solid #001a33;
   z-index: 10;
   flex-shrink: 0;
   flex-grow: 0;
   flex-basis: auto;
-  transition: flex-direction 0.2s;
-  position: relative;
+  transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
-/* Accordion toggle button - only visible on mobile */
-.accordion-toggle {
-  display: none;
-  width: 100%;
-  background: #007AFF;
-  color: white;
-  border: none;
-  border-radius: 0;
-  padding: 0.8em 1em;
-  font-size: clamp(1rem, 2.5vw, 1.3rem);
-  cursor: pointer;
-  z-index: 20;
-  outline: none;
-  transition: background-color 0.2s;
-  font-family: inherit;
-  font-weight: bold;
-  text-align: center;
-  margin: 0;
-  border-bottom: 1px solid #eee;
-}
-
-.accordion-toggle:hover {
-  background: #0056b3;
-}
-
-.accordion-toggle:focus {
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
-}
-
-/* Controls container for mobile accordion */
-.controls-container {
-  display: contents;
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1vmin;
+  justify-content: center;
+  align-items: stretch;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .main-content {
@@ -71,6 +46,7 @@ html, body, #app-wrapper, .main-content {
   height: 100%;
   overflow: hidden; 
   position: relative;
+  margin-top: 1vmin; /* Add space between menu and grid */
 }
 
 .proportional-grid-wrapper {
@@ -84,11 +60,6 @@ html, body, #app-wrapper, .main-content {
   width: 100vw; 
   overflow: hidden;
   transition: transform 0.3s ease-out;
-}
-
-/* Shift grid down when menu is expanded on mobile */
-.proportional-grid-wrapper.menu-expanded {
-  transform: translateY(calc(1.5 * (100vh / 11)));
 }
 
 .grid {
@@ -131,14 +102,17 @@ html, body, #app-wrapper, .main-content {
   display: flex; 
   align-items: center; 
   justify-content: center;
-  font-size: clamp(1rem, min(2.8vw, 2.8vh, 2em), 2em);
+  font-size: clamp(0.9rem, min(2.5vw, 2.5vh, 1.8em), 1.8em);
   padding: 0.3em 1em;
   background: #fff;
+  color: #333;
   white-space: nowrap;
   margin: 0;
   font-family: inherit;
   transition: background-color 0.3s, color 0.3s;
   cursor: pointer;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .scale-control {
@@ -155,6 +129,14 @@ html, body, #app-wrapper, .main-content {
   outline: none;
   padding: 0;
   margin: 0;
+  text-align: center;
+  text-align-last: center; /* For Firefox */
+  width: 100%;
+}
+select.scale-dropdown {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .control-area.selected {
@@ -173,43 +155,6 @@ html, body, #app-wrapper, .main-content {
   user-select: none;
   font-size: inherit;
   font-family: inherit;
-}
-
-.volume-control {
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  gap: 0.5vw;
-  font-size: clamp(1rem, min(2.2vw, 2.2vh, 1.2em), 1.2em);
-  user-select: none;
-  padding: 0.1em 0.6em;
-  background: #fff;
-  border-radius: 0.8vmin;
-  margin: 0;
-  font-family: inherit;
-}
-
-.volume-slider {
-  width: min(16vw, 140px);
-  accent-color: #007AFF;
-  cursor: pointer;
-  min-width: 60px;
-  max-width: 180px;
-}
-
-.volume-label { 
-  font-weight: bold; 
-  margin-right: 0.3em; 
-}
-
-.volume-value {
-  width: 3.2em;
-  text-align: left;
-  color: #444;
-  font-variant-numeric: tabular-nums;
-  font-size: 1em;
-  margin-left: 0.3em;
-  letter-spacing: 0.04em;
 }
 
 .cell img.solfege-img {
@@ -268,79 +213,140 @@ html, body, #app-wrapper, .main-content {
   letter-spacing: 0.02em;
 }
 
-@media (max-width: 550px) {
-  .controls-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    padding: 0; /* Remove padding to let accordion button fill width */
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+  animation: fadeIn 0.3s;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 650px;
+  border-radius: 10px;
+  position: relative;
+  animation: slideIn 0.3s;
+}
+
+.close-button {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Simulated Keyboard Styles */
+#simulated-keyboard {
+  padding: 15px;
+  background: #d1d5db;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid #bbb;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.key {
+  background: linear-gradient(to bottom, #fcfcfc, #e8e8e8);
+  border: 1px solid #b4b4b4;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 1.1em;
+  font-family: Arial, sans-serif;
+  flex-grow: 1;
+  min-width: 30px;
+  text-align: center;
+  box-shadow: 0 2px 0px rgba(0,0,0,0.1);
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #333;
+  cursor: default;
+  transition: all 0.05s ease;
+}
+
+.key-spacer {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.key.pressed {
+  background: linear-gradient(to top, #fcfcfc, #e8e8e8);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+  transform: translateY(1px);
+}
+
+.key-do { background: #FF3B30; color: white; }
+.key-re { background: #FF9500; color: white; }
+.key-mi { background: #FFCC00; color: white; }
+.key-fa { background: #34C759; color: white; }
+.key-so { background: #30c0c6; color: white; }
+.key-la { background: #007AFF; color: white; }
+.key-ti { background: #AF52DE; color: white; }
+
+.key-sharp { background: #990000; color: white; }
+.key-flat { background: #000099; color: white; }
+
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes slideIn {
+  from {transform: translateY(-50px);}
+  to {transform: translateY(0);}
+}
+
+@media (max-width: 680px) {
+  .modal-content {
+    width: 95%;
+    margin: 5% auto;
+    padding: 10px;
   }
 
-  /* Show accordion toggle button on mobile */
-  .accordion-toggle {
-    display: block;
-    order: -1; /* Ensure it appears first */
-  }
-
-  /* Controls container that can be collapsed */
-  .controls-container {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-    order: 1; /* Ensure it appears after the accordion button */
-  }
-
-  .controls-container.collapsed {
-    max-height: 0;
-  }
-
-  .controls-container.expanded {
-    max-height: 300px; /* Adjust based on your content height */
+  #simulated-keyboard {
+    gap: 3px;
+    padding: 10px;
   }
   
-  .control-area, .volume-control {
-    width: 100%;
-    margin: 0;
-    border-radius: 0;
-    border-top: none;
-    border-bottom: 1px solid #eee;
-    background: #fff;
-    justify-content: center;
-    min-height: 0;
-    min-width: 0;
-    font-size: clamp(1rem, min(2.5vw, 2.5vh, 1.5em), 1.5em);
-    padding: 0.8em 1em; /* Increase padding for better touch targets */
-  }
-  
-  .controls-container > *:last-child {
-    border-bottom: none !important;
+  .keyboard-row {
+    gap: 3px;
   }
 
-  /* Accordion button styles */
-  .accordion-toggle .icon {
-    margin-left: 0.5em;
-    transition: transform 0.2s;
-    font-size: 1.2em;
-  }
-
-  .accordion-toggle.collapsed .icon {
-    transform: rotate(0deg);
-  }
-
-  .accordion-toggle.expanded .icon {
-    transform: rotate(180deg);
-  }
-
-  /* Adjust volume control for mobile */
-  .volume-control {
-    padding: 0.8em 1em;
-    gap: 0.8em;
-  }
-
-  .volume-slider {
-    width: min(40vw, 200px);
-    min-width: 120px;
+  .key {
+    padding: 6px;
+    font-size: 0.9em;
+    min-width: 20px;
+    border-radius: 3px;
   }
 }

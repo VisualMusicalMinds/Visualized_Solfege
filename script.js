@@ -21,6 +21,17 @@ const keyNames = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B
 let currentKeyIndex = 0;
 let currentScale = 'major';
 
+// Base color mapping for keys, tied to the 7 note letters
+const KEY_COLORS = {
+  'C': '#FF3B30', // Red
+  'D': '#FF9500', // Orange
+  'E': '#FFCC00', // Yellow
+  'F': '#34C759', // Green
+  'G': '#30c0c6', // Turquoise
+  'A': '#007AFF', // Blue
+  'B': '#AF52DE'  // Purple
+};
+
 // Scale definitions with interval patterns and solfege mappings
 const scaleDefinitions = {
   'major': {
@@ -85,13 +96,13 @@ const scaleSpellings = {
     'Db': {
         'major': ['D♭', 'E♭', 'F', 'G♭', 'A♭', 'B♭', 'C'],
         'dorian': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭', 'C♭'],
-        'phrygian': ['D♭', 'E♭♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C♭'],
+        'phrygian': ['D♭', 'E𝄫', 'F♭', 'G♭', 'A♭', 'B𝄫', 'C♭'],
         'lydian': ['D♭', 'E♭', 'F', 'G', 'A♭', 'B♭', 'C'],
         'mixolydian': ['D♭', 'E♭', 'F', 'G♭', 'A♭', 'B♭', 'C♭'],
-        'natural-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C♭'],
-        'harmonic-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C'],
+        'natural-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B𝄫', 'C♭'],
+        'harmonic-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B𝄫', 'C'],
         'melodic-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭', 'C'],
-        'locrian': ['D♭', 'E♭♭', 'F♭', 'G♭♭', 'A♭♭', 'B♭♭', 'C♭']
+        'locrian': ['D♭', 'E𝄫', 'F♭', 'G𝄫', 'A𝄫', 'B𝄫', 'C♭']
     },
     'D': {
         'major': ['D', 'E', 'F♯', 'G', 'A', 'B', 'C♯'],
@@ -113,7 +124,7 @@ const scaleSpellings = {
         'natural-minor': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C♭', 'D♭'],
         'harmonic-minor': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C♭', 'D'],
         'melodic-minor': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C', 'D'],
-        'locrian': ['E♭', 'F♭', 'G♭', 'A♭', 'B♭♭', 'C♭', 'D♭']
+        'locrian': ['E♭', 'F♭', 'G♭', 'A♭', 'B𝄫', 'C♭', 'D♭']
     },
     'E': {
         'major': ['E', 'F♯', 'G♯', 'A', 'B', 'C♯', 'D♯'],
@@ -139,14 +150,14 @@ const scaleSpellings = {
     },
     'Gb': {
         'major': ['G♭', 'A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F'],
-        'dorian': ['G♭', 'A♭', 'B♭♭', 'C♭', 'D♭', 'E♭', 'F♭'],
-        'phrygian': ['G♭', 'A♭♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F♭'],
+        'dorian': ['G♭', 'A♭', 'B𝄫', 'C♭', 'D♭', 'E♭', 'F♭'],
+        'phrygian': ['G♭', 'A𝄫', 'B𝄫', 'C♭', 'D♭', 'E𝄫', 'F♭'],
         'lydian': ['G♭', 'A♭', 'B♭', 'C', 'D♭', 'E♭', 'F'],
         'mixolydian': ['G♭', 'A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F♭'],
-        'natural-minor': ['G♭', 'A♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F♭'],
-        'harmonic-minor': ['G♭', 'A♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F'],
-        'melodic-minor': ['G♭', 'A♭', 'B♭♭', 'C♭', 'D♭', 'E♭', 'F'],
-        'locrian': ['G♭', 'A♭♭', 'B♭♭', 'C♭', 'D♭♭', 'E♭♭', 'F♭']
+        'natural-minor': ['G♭', 'A♭', 'B𝄫', 'C♭', 'D♭', 'E𝄫', 'F♭'],
+        'harmonic-minor': ['G♭', 'A♭', 'B𝄫', 'C♭', 'D♭', 'E𝄫', 'F'],
+        'melodic-minor': ['G♭', 'A♭', 'B𝄫', 'C♭', 'D♭', 'E♭', 'F'],
+        'locrian': ['G♭', 'A𝄫', 'B𝄫', 'C♭', 'D𝄫', 'E𝄫', 'F♭']
     },
     'G': {
         'major': ['G', 'A', 'B', 'C', 'D', 'E', 'F♯'],
@@ -162,13 +173,13 @@ const scaleSpellings = {
     'Ab': {
         'major': ['A♭', 'B♭', 'C', 'D♭', 'E♭', 'F', 'G'],
         'dorian': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F', 'G♭'],
-        'phrygian': ['A♭', 'B♭♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G♭'],
+        'phrygian': ['A♭', 'B𝄫', 'C♭', 'D♭', 'E♭', 'F♭', 'G♭'],
         'lydian': ['A♭', 'B♭', 'C', 'D', 'E♭', 'F', 'G'],
         'mixolydian': ['A♭', 'B♭', 'C', 'D♭', 'E♭', 'F', 'G♭'],
         'natural-minor': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G♭'],
         'harmonic-minor': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G'],
         'melodic-minor': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F', 'G'],
-        'locrian': ['A♭', 'B♭♭', 'C♭', 'D♭', 'E♭♭', 'F♭', 'G♭']
+        'locrian': ['A♭', 'B𝄫', 'C♭', 'D♭', 'E𝄫', 'F♭', 'G♭']
     },
     'A': {
         'major': ['A', 'B', 'C♯', 'D', 'E', 'F♯', 'G♯'],
@@ -233,24 +244,13 @@ function generateColorsForScale(keyName, scaleName) {
     const scale = scaleDefinitions[scaleName];
     if (!scale) return {};
 
-    // Base color mapping tied to the 7 note letters (C, D, E, F, G, A, B)
-    const noteLetterColors = {
-      'C': '#FF3B30',   // Red
-      'D': '#FF9500',   // Orange
-      'E': '#FFCC00',   // Yellow
-      'F': '#34C759',   // Green
-      'G': '#30c0c6',   // Darker Turquoise
-      'A': '#007AFF',   // Blue
-      'B': '#AF52DE'    // Purple
-    };
-
     const letterNames = generateLetterNamesForScale(keyName, scaleName);
     const colors = {};
 
     for (const solfege in letterNames) {
         const noteName = letterNames[solfege];
         const noteLetter = noteName.charAt(0);
-        colors[solfege] = noteLetterColors[noteLetter];
+        colors[solfege] = KEY_COLORS[noteLetter];
     }
 
     return colors;
@@ -260,7 +260,7 @@ function generateColorsForScale(keyName, scaleName) {
 const baseFrequencies = {
     'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
     'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
-    'F5': 698.46
+    'F5': 698.46, 'F3': 174.61
 };
 
 // This will hold the currently active frequencies for the selected key and scale
@@ -269,8 +269,13 @@ let noteFrequencies = {};
 // Function to calculate and update note frequencies for the current key and scale
 function updateNoteFrequencies() {
     const keyIndex = currentKeyIndex; // 0 for C, 1 for Db, etc.
-    const rootFrequency = 261.63 * Math.pow(2, keyIndex / 12); // C4 as the base
+    let rootFrequency = 261.63 * Math.pow(2, keyIndex / 12); // C4 as the base
     const scale = scaleDefinitions[currentScale];
+
+    // Lower the octave for keys Ab, A, Bb, and B to make them the lowest
+    if ([8, 9, 10, 11].includes(keyIndex)) {
+        rootFrequency /= 2;
+    }
 
     const scaleFrequencies = {};
     scale.intervals.forEach((interval, i) => {
@@ -295,6 +300,7 @@ function updateNoteFrequencies() {
         'D5': scaleFrequencies['Re'] * 2,
         'E5': (scaleFrequencies['Mi'] || scaleFrequencies['Me']) * 2,
         'F5': (scaleFrequencies['Fa'] || scaleFrequencies['Fi']) * 2,
+        'F3': (scaleFrequencies['Fa'] || scaleFrequencies['Fi']) / 2,
     };
 
     // Handle Phrygian 'Ra' which replaces 'Re'
@@ -324,12 +330,11 @@ function updateScaleMappings() {
 
   // Also update the frequencies whenever the scale or key changes
   updateNoteFrequencies();
+  updateSimulatedKeyboardColors();
 }
 
 // UI state
 let cButtonState = 'note'; // can be 'note' or 'S'
-let keyboardButtonActive = false;
-let accordionCollapsed = true; // Start collapsed on mobile
 
 // Map to identify if a note is flat or sharp
 const noteAccidentalMap = {
@@ -342,7 +347,7 @@ const noteAccidentalMap = {
   'B': false, 'B#': 'sharp', 'B♯': 'sharp', 'Cb': 'flat', 'C♭': 'flat',
   // Double flats and sharps
   'Cbb': 'double-flat', 'Dbb': 'double-flat', 'Ebb': 'double-flat', 'Fbb': 'double-flat', 'Gbb': 'double-flat', 'Abb': 'double-flat', 'Bbb': 'double-flat',
-  'C♭♭': 'double-flat', 'D♭♭': 'double-flat', 'E♭♭': 'double-flat', 'F♭♭': 'double-flat', 'G♭♭': 'double-flat', 'A♭♭': 'double-flat', 'B♭♭': 'double-flat',
+  'C𝄫': 'double-flat', 'D𝄫': 'double-flat', 'E𝄫': 'double-flat', 'F𝄫': 'double-flat', 'G𝄫': 'double-flat', 'A𝄫': 'double-flat', 'B𝄫': 'double-flat',
   'Cx': 'double-sharp', 'Dx': 'double-sharp', 'Ex': 'double-sharp', 'Fx': 'double-sharp', 'Gx': 'double-sharp', 'Ax': 'double-sharp', 'Bx': 'double-sharp',
   'C♯♯': 'double-sharp', 'D♯♯': 'double-sharp', 'E♯♯': 'double-sharp', 'F♯♯': 'double-sharp', 'G♯♯': 'double-sharp', 'A♯♯': 'double-sharp', 'B♯♯': 'double-sharp',
 };
@@ -353,8 +358,18 @@ const buttonSolfegeNames = {
   'z': 'So', 'w': 'La', 'e': 'Ti', '1': 'Do', '2': 'Re', '3': 'Mi',
   ';': 'Fa', 'm': 'So', 'l': 'Mi', 'k': 'Re', 'j': 'Do', ',': 'La', '.': 'Ti',
   'u': 'So', 'i': 'La', 'o': 'Ti', '7': 'Do', '8': 'Re', '9': 'Mi',
-  'y': 'Fa', 'h': 'Ti', '/': 'Do', 'p': 'Do', '6': 'Ti', '0': 'Fa',
-  // New mappings for alternative solfege syllables will be handled dynamically
+  'y': 'Fa', 'h': 'Ti', '/': 'Do', 'p': 'Do', '6': 'Ti', '0': 'Fa', 'r': 'Do', 'v': 'Do', '4': 'Fa',
+  'n': 'Fa'
+};
+
+const solfegeToCssClass = {
+    'Do': 'key-do',
+    'Re': 'key-re', 'Ra': 'key-re',
+    'Mi': 'key-mi', 'Me': 'key-mi',
+    'Fa': 'key-fa', 'Fi': 'key-fa',
+    'So': 'key-so', 'Se': 'key-so',
+    'La': 'key-la', 'Le': 'key-la',
+    'Ti': 'key-ti', 'Te': 'key-ti',
 };
 
 // Function to get current solfege syllable for a key based on current scale
@@ -374,38 +389,6 @@ function getCurrentSolfege(key) {
   }
   
   return baseSolfege;
-}
-
-// Keyboard display pairs for display in keyboard mode (expanded for new syllables)
-const keyboardDisplayPairs = {
-  'Fa': 'f | ;', 'Mi': 'd | l', 'Re': 's | k', 'Do': 'a | j', 'Ti': 'c | .', 'La': 'x | ,', 'So': 'z | m',
-  // Additional syllables
-  'Me': 'd | l', 'Le': 'x | ,', 'Te': 'c | .', 'Ra': 's | k', 'Fi': 'f | ;', 'Se': 'z | m'
-};
-
-const keyboardDisplayPairsWithPosition = {
-  'mid_Fa': 'f | ;',  'mid_Mi': 'd | l',  'mid_Re': 's | k',  'mid_Do': 'a | j | v',
-  'low_Ti': 'c | .', 'low_La': 'x | ,', 'low_So': 'z | m',
-  'high_So': 'q | u', 'high_La': 'w | i', 'high_Ti': 'e | o',
-  'higher_Do': '1 | 7 | r', 'higher_Re': '2 | 8', 'higher_Mi': '3 | 9',
-  'highest_Fa': '0 | 4'
-};
-
-// Map button keys to which note they represent (grouped by note position)
-const keyGroups = {
-  'low_So': ['z', 'm'], 'low_La': ['x', ','], 'low_Ti': ['c', '.', 'h'],
-  'mid_Do': ['a', 'j', '/', 'v'], 'mid_Re': ['s', 'k'], 'mid_Mi': ['d', 'l'], 'mid_Fa': ['f', ';', 'y'],
-  'high_So': ['q', 'u'], 'high_La': ['w', 'i'], 'high_Ti': ['e', 'o', '6'],
-  'higher_Do': ['1', '7', 'p', 'r'], 'higher_Re': ['2', '8'], 'higher_Mi': ['3', '9'],
-  'highest_Fa': ['0', '4']
-};
-
-// Map to find the position group for a key
-const keyToPositionGroup = {};
-for (const [group, keys] of Object.entries(keyGroups)) {
-  for (const key of keys) {
-    keyToPositionGroup[key] = group;
-  }
 }
 
 // Audio synthesis setup
@@ -603,7 +586,8 @@ const buttons = [
   { name: 'Do', keys: ['1', '7', 'p', 'r'], note: 'C5', cells: ['2c','2d'] },
   { name: 'Re', keys: ['2', '8'], note: 'D5', cells: ['1c'] },
   { name: 'Mi', keys: ['3', '9'], note: 'E5', cells: ['1d'] },
-  { name: 'Fa', keys: ['0', '4'], note: 'F5', cells: [] }
+  { name: 'Fa', keys: ['0', '4'], note: 'F5', cells: [] },
+  { name: 'Fa', keys: ['n'], note: 'F3', cells: [] }
 ];
 
 // DOM references
@@ -611,36 +595,6 @@ const grid = document.getElementById('grid');
 const keyToDiv = {};
 const cellRefs = {};
 const noteButtonRefs = {};
-
-// --- ACCORDION FUNCTIONALITY ---
-function toggleAccordion() {
-  accordionCollapsed = !accordionCollapsed;
-  updateAccordionState();
-}
-
-function updateAccordionState() {
-  const controlsContainer = document.querySelector('.controls-container');
-  const accordionToggle = document.querySelector('.accordion-toggle');
-  const gridWrapper = document.querySelector('.proportional-grid-wrapper');
-  
-  if (!controlsContainer || !accordionToggle || !gridWrapper) return;
-  
-  if (accordionCollapsed) {
-    controlsContainer.classList.remove('expanded');
-    controlsContainer.classList.add('collapsed');
-    accordionToggle.classList.remove('expanded');
-    accordionToggle.classList.add('collapsed');
-    accordionToggle.innerHTML = 'Menu <span class="icon">▼</span>';
-    gridWrapper.classList.remove('menu-expanded');
-  } else {
-    controlsContainer.classList.remove('collapsed');
-    controlsContainer.classList.add('expanded');
-    accordionToggle.classList.remove('collapsed');
-    accordionToggle.classList.add('expanded');
-    accordionToggle.innerHTML = 'Menu <span class="icon">▲</span>';
-    gridWrapper.classList.add('menu-expanded');
-  }
-}
 
 // --- UI SETUP ---
 function initializeGrid() {
@@ -672,18 +626,12 @@ function renderToggleButton() {
   }
   el.addEventListener('click', () => {
     cButtonState = (cButtonState === 'note') ? 'S' : 'note';
-    keyboardButtonActive = false;
-    updateKeyboardButton();
-    renderToggleButton();
     updateBoxNames();
   });
   el.addEventListener('keydown', (e) => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       cButtonState = (cButtonState === 'note') ? 'S' : 'note';
-      keyboardButtonActive = false;
-      updateKeyboardButton();
-      renderToggleButton();
       updateBoxNames();
     }
   });
@@ -708,7 +656,7 @@ function setSharpTouchHeld(val) {
 
 function setFlatTouchHeld(val) {
   flatTouchHeld = val;
-  if (val) cellRefs['8d'].classList.add('active');
+  if (val) cellRefs['8d'].classList.remove('active');
   else cellRefs['8d'].classList.remove('active');
   reTriggerHeldKeysAccidentals();
 }
@@ -753,20 +701,7 @@ function updateBoxNames() {
     const div = noteButtonRefs[btn.keys[0]];
     if (!div) continue;
 
-    if (keyboardButtonActive) {
-      const keyPosition = keyToPositionGroup[btn.keys[0]];
-      let kbText = '';
-      if (keyboardDisplayPairsWithPosition[keyPosition]) {
-        kbText = keyboardDisplayPairsWithPosition[keyPosition];
-      } else {
-        // Use the current solfege syllable for this button
-        const currentSolfege = getCurrentSolfege(btn.keys[0]);
-        kbText = keyboardDisplayPairs[currentSolfege] || '';
-      }
-      div.innerHTML = `<span class="keybinding-text">${kbText}</span>`;
-      div.style.color = 'white';
-    }
-    else if (cButtonState === 'note') {
+    if (cButtonState === 'note') {
       // Get the current solfege syllable for this scale
       const currentSolfege = getCurrentSolfege(btn.keys[0]);
       div.textContent = currentSolfege || btn.name;
@@ -800,56 +735,30 @@ function updateBoxNames() {
 
 function createControlsBar() {
   const controlsBar = document.getElementById('controls-bar');
+  controlsBar.innerHTML = ''; // Clear existing controls
   
-  // Create accordion toggle button
-  const accordionToggle = document.createElement('button');
-  accordionToggle.className = 'accordion-toggle collapsed';
-  accordionToggle.innerHTML = 'Menu <span class="icon">▼</span>';
-  accordionToggle.addEventListener('click', toggleAccordion);
-  
-  // Create controls container
-  const controlsContainer = document.createElement('div');
-  controlsContainer.className = 'controls-container collapsed';
-  
-  // Key control
   const keyButton = document.createElement('div');
   keyButton.className = 'control-area';
   keyButton.tabIndex = 0;
   keyButton.setAttribute('aria-label', 'Key control');
   keyButton.innerHTML = '<div class="arrow" id="key-left">&#9664;</div><div id="key-name">C</div><div class="arrow" id="key-right">&#9654;</div>';
 
-  // Scale control
   const scaleControl = document.createElement('div');
   scaleControl.className = 'control-area scale-control';
   scaleControl.tabIndex = 0;
   scaleControl.setAttribute('aria-label', 'Scale control');
   
-  // Create scale dropdown with all scales
   const scaleOptions = Object.entries(scaleDefinitions)
     .map(([key, scale]) => `<option value="${key}" ${key === currentScale ? 'selected' : ''}>${scale.name}</option>`)
     .join('');
   scaleControl.innerHTML = `<select id="scale-select" class="scale-dropdown">${scaleOptions}</select>`;
 
-  // Waveform control
   const waveButton = document.createElement('div');
   waveButton.className = 'control-area';
   waveButton.tabIndex = 0;
   waveButton.setAttribute('aria-label', 'Waveform control');
   waveButton.innerHTML = '<div class="arrow" id="left-arrow">&#9664;</div><div id="waveform-name">triangle</div><div class="arrow" id="right-arrow">&#9654;</div>';
 
-  // Volume control
-  const volumeControl = document.createElement('div');
-  volumeControl.className = 'volume-control';
-  volumeControl.innerHTML = `
-    <span class="volume-label" id="volume-label" for="volume-slider">Volume</span>
-    <input type="range" min="0" max="1" step="0.01" value="0.4" id="volume-slider" class="volume-slider" aria-label="Volume slider">
-    <span class="volume-value" id="volume-value">40%</span>
-  `;
-  volumeControl.tabIndex = 0;
-  volumeControl.setAttribute('aria-label', 'Volume control');
-  volumeControl.style.outline = 'none';
-
-  // Keyboard button
   const keyboardButton = document.createElement('div');
   keyboardButton.className = 'control-area keyboard-button';
   keyboardButton.tabIndex = 0;
@@ -857,31 +766,50 @@ function createControlsBar() {
   keyboardButton.textContent = 'Keyboard';
   keyboardButton.id = 'keyboard-button';
 
-  // Add controls to container
-  controlsContainer.appendChild(keyButton);
-  controlsContainer.appendChild(scaleControl);
-  controlsContainer.appendChild(waveButton);
-  controlsContainer.appendChild(volumeControl);
-  controlsContainer.appendChild(keyboardButton);
+  // Group key and scale controls vertically
+  const keyScaleGroup = document.createElement('div');
+  keyScaleGroup.className = 'control-group';
+  keyScaleGroup.appendChild(keyButton);
+  keyScaleGroup.appendChild(scaleControl);
+  
+  // Group waveform and keyboard controls vertically
+  const waveKeyboardGroup = document.createElement('div');
+  waveKeyboardGroup.className = 'control-group';
+  waveKeyboardGroup.appendChild(waveButton);
+  waveKeyboardGroup.appendChild(keyboardButton);
 
-  // Add both accordion toggle and container to controls bar
-  controlsBar.appendChild(accordionToggle);
-  controlsBar.appendChild(controlsContainer);
+  controlsBar.appendChild(keyScaleGroup);
+  controlsBar.appendChild(waveKeyboardGroup);
 
-  return { keyButton, scaleControl, waveButton, volumeControl, keyboardButton };
+  return { keyButton, scaleControl, waveButton, keyboardButton };
 }
 
-function updateKeyboardButton() {
-  const keyboardButton = document.getElementById('keyboard-button');
-  if (keyboardButtonActive) {
-    keyboardButton.classList.add('active-control');
-    keyboardButton.style.background = '#007AFF';
-    keyboardButton.style.color = 'white';
-  } else {
-    keyboardButton.classList.remove('active-control');
-    keyboardButton.style.background = '';
-    keyboardButton.style.color = '';
-  }
+function darkenColor(hex, percent) {
+    hex = hex.replace('#', '');
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+    r = parseInt(r * (100 - percent) / 100);
+    g = parseInt(g * (100 - percent) / 100);
+    b = parseInt(b * (100 - percent) / 100);
+    r = (r < 0) ? 0 : r;
+    g = (g < 0) ? 0 : g;
+    b = (b < 0) ? 0 : b;
+    const rHex = (r.toString(16).length === 1) ? '0' + r.toString(16) : r.toString(16);
+    const gHex = (g.toString(16).length === 1) ? '0' + g.toString(16) : g.toString(16);
+    const bHex = (b.toString(16).length === 1) ? '0' + b.toString(16) : b.toString(16);
+    return `#${rHex}${gHex}${bHex}`;
+}
+
+function updateControlsBarColor() {
+    const keyName = keyNames[currentKeyIndex];
+    const baseNote = keyName.charAt(0);
+    const color = KEY_COLORS[baseNote] || '#001f3f';
+    const borderColor = darkenColor(color, 30);
+    
+    const controlsBar = document.getElementById('controls-bar');
+    controlsBar.style.backgroundColor = color;
+    controlsBar.style.borderColor = borderColor;
 }
 
 function setupControlEvents() {
@@ -891,6 +819,7 @@ function setupControlEvents() {
     updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
+    updateControlsBarColor();
   };
   
   document.getElementById("key-right").onclick = () => {
@@ -899,19 +828,25 @@ function setupControlEvents() {
     updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
+    updateControlsBarColor();
   };
   
-  // Scale dropdown change handler
-  document.getElementById("scale-select").onchange = (e) => {
+  const scaleSelect = document.getElementById("scale-select");
+  scaleSelect.onchange = (e) => {
     currentScale = e.target.value;
-    // Find the scale key from the selected option's value
     const selectedScaleKey = e.target.value;
-    // A bit of a workaround if the dropdown value doesn't exactly match the scale key
     const scaleKey = Object.keys(scaleDefinitions).find(key => key === selectedScaleKey) || 'major';
     currentScale = scaleKey;
     updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
+  };
+
+  // Prevent letter keys from changing the dropdown selection
+  scaleSelect.onkeydown = (e) => {
+    if (e.key.length === 1 && e.key.match(/[a-zA-Z]/)) {
+      e.preventDefault();
+    }
   };
   
   document.getElementById("left-arrow").onclick = () => {
@@ -926,22 +861,22 @@ function setupControlEvents() {
     document.getElementById("waveform-name").textContent = currentWaveform;
   };
 
-  // Volume control
-  const volumeSlider = document.getElementById('volume-slider');
-  const volumeValue = document.getElementById('volume-value');
-  volumeSlider.value = globalVolume;
-  volumeValue.textContent = `${Math.round(globalVolume * 100)}%`;
-  volumeSlider.addEventListener('input', () => {
-    globalVolume = parseFloat(volumeSlider.value);
-    volumeValue.textContent = `${Math.round(globalVolume * 100)}%`;
+  const keyboardButton = document.getElementById('keyboard-button');
+  const modal = document.getElementById('keyboard-modal');
+  const closeButton = document.querySelector('.close-button');
+
+  keyboardButton.addEventListener('click', () => {
+    modal.style.display = 'block';
   });
 
-  // Keyboard button
-  const keyboardButton = document.getElementById('keyboard-button');
-  keyboardButton.addEventListener('click', () => {
-    keyboardButtonActive = !keyboardButtonActive;
-    updateKeyboardButton();
-    updateBoxNames();
+  closeButton.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  window.addEventListener('click', (event) => {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
   });
 }
 
@@ -952,14 +887,12 @@ function renderButtons() {
     const div = document.createElement('div');
     div.className = 'note-button';
     
-    // Get the current solfege syllable for this button
     const currentSolfege = getCurrentSolfege(btn.keys[0]);
     div.textContent = currentSolfege || btn.name;
     
     div.style.outline = 'none';
     div.setAttribute('data-keys', btn.keys.join(','));
     
-    // Get color from current mappings
     const currentKey = keyNames[currentKeyIndex];
     const color = (noteColorsByKey[currentKey] && noteColorsByKey[currentKey][currentSolfege]) || '#ccc';
     div.style.backgroundColor = color;
@@ -976,7 +909,6 @@ function renderButtons() {
     div.style.height = `${height}%`;
     div.style.width = `${width}%`;
 
-    // Mouse events
     div.addEventListener('mousedown', (e) => {
       e.preventDefault();
       handlePlayKey(btn.keys[0]);
@@ -994,7 +926,6 @@ function renderButtons() {
       div.classList.remove('active');
     });
 
-    // Touch events
     div.addEventListener('touchstart', (e) => {
       e.preventDefault();
       for (let i = 0; i < e.changedTouches.length; i++) {
@@ -1015,7 +946,8 @@ function renderButtons() {
 }
 
 function setupGlobalEventHandlers() {
-  // Touch and mouse cleanup
+  const modal = document.getElementById('keyboard-modal');
+
   document.addEventListener('touchend', handleTouchEnd);
   document.addEventListener('touchcancel', handleTouchEnd);
   
@@ -1034,10 +966,16 @@ function setupGlobalEventHandlers() {
     }
   });
 
-  // Keyboard events
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     let accidentalChanged = false;
+
+    if (modal.style.display === 'block') {
+      const keyElement = document.querySelector(`#simulated-keyboard .key[data-key="${e.key.toLowerCase()}"]`);
+      if (keyElement) {
+        keyElement.classList.add('pressed');
+      }
+    }
     
     if (e.key === '=') {
       accidentalHeld.sharp = true; 
@@ -1050,7 +988,6 @@ function setupGlobalEventHandlers() {
       cellRefs['8d'].classList.add('active');
     }
 
-    // Control navigation
     if (document.activeElement && document.activeElement.classList.contains('control-area')) {
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         if (document.activeElement.querySelector('#key-left')) {
@@ -1068,12 +1005,6 @@ function setupGlobalEventHandlers() {
       }
     }
 
-    if (document.activeElement && document.activeElement.classList.contains('volume-control') && 
-        (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-      e.preventDefault();
-      return;
-    }
-
     if (document.activeElement && document.activeElement.id === 'keyboard-button' && 
         (e.key === ' ' || e.key === 'Enter')) {
       document.getElementById('keyboard-button').click();
@@ -1081,7 +1012,6 @@ function setupGlobalEventHandlers() {
       return;
     }
 
-    // Note playing
     if (!heldKeys.has(e.key) && buttons.some(b => b.keys.includes(e.key))) {
       heldKeys.add(e.key);
       handlePlayKey(e.key);
@@ -1095,6 +1025,13 @@ function setupGlobalEventHandlers() {
 
   window.addEventListener('keyup', (e) => {
     let accidentalChanged = false;
+
+    if (modal.style.display === 'block') {
+      const keyElement = document.querySelector(`#simulated-keyboard .key[data-key="${e.key.toLowerCase()}"]`);
+      if (keyElement) {
+        keyElement.classList.remove('pressed');
+      }
+    }
     
     if (e.key === '=') {
       accidentalHeld.sharp = false; 
@@ -1118,7 +1055,6 @@ function setupGlobalEventHandlers() {
     }
   });
 
-  // Visibility and blur cleanup
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       for (const key of [...heldNoteKeys]) {
@@ -1142,29 +1078,6 @@ function setupGlobalEventHandlers() {
       for (const key of activeOscKeys) {
         stopNote(key);
       }
-    }
-  });
-
-  // Handle window resize to update accordion state
-  window.addEventListener('resize', () => {
-    const mq = window.matchMedia("(max-width: 550px)");
-    if (!mq.matches) {
-      // Reset accordion state when returning to desktop
-      const controlsContainer = document.querySelector('.controls-container');
-      const accordionToggle = document.querySelector('.accordion-toggle');
-      const gridWrapper = document.querySelector('.proportional-grid-wrapper');
-      if (controlsContainer) {
-        controlsContainer.classList.remove('collapsed', 'expanded');
-      }
-      if (accordionToggle) {
-        accordionToggle.style.display = 'none';
-      }
-      if (gridWrapper) {
-        gridWrapper.classList.remove('menu-expanded');
-      }
-    } else {
-      // Ensure proper state on mobile
-      updateAccordionState();
     }
   });
 }
@@ -1196,28 +1109,116 @@ function updateSolfegeColors() {
   buttons.forEach(btn => {
     const div = keyToDiv[btn.keys[0]];
     if (div) {
-      // Get the current solfege syllable for this button and scale
       const currentSolfege = getCurrentSolfege(btn.keys[0]);
       
       if (bgColors && bgColors[currentSolfege]) {
         div.style.backgroundColor = bgColors[currentSolfege];
       }
 
-      if (!keyboardButtonActive) {
-        const noteValue = letterNamesByKey[currentKey] && letterNamesByKey[currentKey][currentSolfege];
+      const noteValue = letterNamesByKey[currentKey] && letterNamesByKey[currentKey][currentSolfege];
 
-        if (noteValue && (noteAccidentalMap[noteValue] === 'flat' || noteAccidentalMap[noteValue] === 'double-flat')) {
-            div.style.color = DARK_BLUE;
-        } else if (noteValue && (noteAccidentalMap[noteValue] === 'sharp' || noteAccidentalMap[noteValue] === 'double-sharp')) {
-            div.style.color = DARK_RED;
-        } else {
-          div.style.color = 'white';
-        }
+      if (noteValue && (noteAccidentalMap[noteValue] === 'flat' || noteAccidentalMap[noteValue] === 'double-flat')) {
+          div.style.color = DARK_BLUE;
+      } else if (noteValue && (noteAccidentalMap[noteValue] === 'sharp' || noteAccidentalMap[noteValue] === 'double-sharp')) {
+          div.style.color = DARK_RED;
       } else {
         div.style.color = 'white';
       }
     }
   });
+}
+
+function updateSimulatedKeyboardColors() {
+    const currentKey = keyNames[currentKeyIndex];
+    const letterNames = letterNamesByKey[currentKey];
+    if (!letterNames) return;
+
+    const simulatedKeys = document.querySelectorAll('#simulated-keyboard .key[data-key]');
+    
+    simulatedKeys.forEach(keyEl => {
+        const key = keyEl.getAttribute('data-key');
+        const solfege = getCurrentSolfege(key);
+
+        Object.values(solfegeToCssClass).forEach(className => keyEl.classList.remove(className));
+        
+        const isAccidentalKey = keyEl.classList.contains('key-sharp') || keyEl.classList.contains('key-flat');
+        if (!isAccidentalKey) {
+            keyEl.style.color = '';
+        }
+
+        if (solfege) {
+            const noteNameForColor = letterNames[solfege];
+            if (noteNameForColor) {
+                const noteLetter = noteNameForColor.charAt(0);
+                const baseSolfege = scaleDefinitions.major.solfege.find((s, i) => scaleSpellings.C.major[i] === noteLetter);
+                const cssClass = solfegeToCssClass[baseSolfege];
+                if (cssClass) {
+                    keyEl.classList.add(cssClass);
+                }
+            }
+
+            const noteValue = letterNames[solfege];
+            if (noteValue) {
+                const accidental = noteAccidentalMap[noteValue];
+                if (accidental === 'sharp' || accidental === 'double-sharp') {
+                    keyEl.style.color = DARK_RED;
+                } else if (accidental === 'flat' || accidental === 'double-flat') {
+                    keyEl.style.color = DARK_BLUE;
+                }
+            }
+        }
+    });
+}
+
+function setupSimulatedKeyboardEvents() {
+    const simulatedKeys = document.querySelectorAll('#simulated-keyboard .key[data-key]');
+    simulatedKeys.forEach(keyElement => {
+        const key = keyElement.getAttribute('data-key');
+
+        const handlePress = (e) => {
+            e.preventDefault();
+            keyElement.classList.add('pressed');
+
+            if (buttonSolfegeNames[key]) {
+                handlePlayKey(key);
+                if (keyToDiv[key]) keyToDiv[key].classList.add('active');
+            } else if (key === '=') {
+                accidentalHeld.sharp = true;
+                cellRefs['7d'].classList.add('active');
+                reTriggerHeldKeysAccidentals();
+            } else if (key === '-') {
+                accidentalHeld.flat = true;
+                cellRefs['8d'].classList.add('active');
+                reTriggerHeldKeysAccidentals();
+            }
+        };
+
+        const handleRelease = (e) => {
+            e.preventDefault();
+            keyElement.classList.remove('pressed');
+
+            if (buttonSolfegeNames[key]) {
+                handleStopKey(key);
+                if (keyToDiv[key]) keyToDiv[key].classList.remove('active');
+            } else if (key === '=') {
+                accidentalHeld.sharp = false;
+                cellRefs['7d'].classList.remove('active');
+                reTriggerHeldKeysAccidentals();
+            } else if (key === '-') {
+                accidentalHeld.flat = false;
+                cellRefs['8d'].classList.remove('active');
+                reTriggerHeldKeysAccidentals();
+            }
+        };
+
+        keyElement.addEventListener('mousedown', handlePress);
+        keyElement.addEventListener('mouseup', handleRelease);
+        keyElement.addEventListener('mouseleave', handleRelease);
+
+        keyElement.addEventListener('touchstart', handlePress);
+        keyElement.addEventListener('touchend', handleRelease);
+        keyElement.addEventListener('touchcancel', handleRelease);
+    });
 }
 
 function resizeGrid() {
@@ -1265,8 +1266,8 @@ function initialize() {
   setupControlEvents();
   renderButtons();
   setupGlobalEventHandlers();
+  setupSimulatedKeyboardEvents();
   
-  // Resize handling
   window.addEventListener('resize', resizeGrid);
   window.addEventListener('DOMContentLoaded', () => { 
     setTimeout(() => { 
@@ -1281,7 +1282,7 @@ function initialize() {
     updateScaleMappings();
     updateSolfegeColors(); 
     updateBoxNames(); 
-    updateAccordionState(); // Initialize accordion state
+    updateControlsBarColor();
   }, 200);
   
   const mq = window.matchMedia("(max-width: 550px)");
@@ -1291,10 +1292,10 @@ function initialize() {
     updateBoxNames(); 
   });
 
-  // Initial setup
-  updateScaleMappings(); // Initialize scale mappings first
+  updateScaleMappings();
   updateSolfegeColors();
   updateBoxNames();
+  updateControlsBarColor();
 }
 
 // Start the application

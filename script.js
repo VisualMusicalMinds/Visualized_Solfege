@@ -104,6 +104,17 @@ const scaleSpellings = {
         'melodic-minor': ['D♭', 'E♭', 'F♭', 'G♭', 'A♭', 'B♭', 'C'],
         'locrian': ['D♭', 'E𝄫', 'F♭', 'G𝄫', 'A𝄫', 'B𝄫', 'C♭']
     },
+    'C#': {
+        'major': ['C♯', 'D♯', 'E♯', 'F♯', 'G♯', 'A♯', 'B♯'],
+        'dorian': ['C♯', 'D♯', 'E', 'F♯', 'G♯', 'A♯', 'B'],
+        'phrygian': ['C♯', 'D', 'E', 'F♯', 'G♯', 'A', 'B'],
+        'lydian': ['C♯', 'D♯', 'E♯', 'F♯♯', 'G♯', 'A♯', 'B♯'],
+        'mixolydian': ['C♯', 'D♯', 'E♯', 'F♯', 'G♯', 'A♯', 'B'],
+        'natural-minor': ['C♯', 'D♯', 'E', 'F♯', 'G♯', 'A', 'B'],
+        'harmonic-minor': ['C♯', 'D♯', 'E', 'F♯', 'G♯', 'A', 'B♯'],
+        'melodic-minor': ['C♯', 'D♯', 'E', 'F♯', 'G♯', 'A♯', 'B♯'],
+        'locrian': ['C♯', 'D', 'E', 'F♯', 'G', 'A', 'B']
+    },
     'D': {
         'major': ['D', 'E', 'F♯', 'G', 'A', 'B', 'C♯'],
         'dorian': ['D', 'E', 'F', 'G', 'A', 'B', 'C'],
@@ -125,6 +136,17 @@ const scaleSpellings = {
         'harmonic-minor': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C♭', 'D'],
         'melodic-minor': ['E♭', 'F', 'G♭', 'A♭', 'B♭', 'C', 'D'],
         'locrian': ['E♭', 'F♭', 'G♭', 'A♭', 'B𝄫', 'C♭', 'D♭']
+    },
+    'D#': {
+        'major': ['D♯', 'E♯', 'F♯♯', 'G♯', 'A♯', 'B♯', 'C♯♯'],
+        'dorian': ['D♯', 'E♯', 'F♯', 'G♯', 'A♯', 'B♯', 'C♯'],
+        'phrygian': ['D♯', 'E', 'F♯', 'G♯', 'A♯', 'B', 'C♯'],
+        'lydian': ['D♯', 'E♯', 'F♯♯', 'G♯♯', 'A♯', 'B♯', 'C♯♯'],
+        'mixolydian': ['D♯', 'E♯', 'F♯♯', 'G♯', 'A♯', 'B♯', 'C♯'],
+        'natural-minor': ['D♯', 'E♯', 'F♯', 'G♯', 'A♯', 'B', 'C♯'],
+        'harmonic-minor': ['D♯', 'E♯', 'F♯', 'G♯', 'A♯', 'B', 'C♯♯'],
+        'melodic-minor': ['D♯', 'E♯', 'F♯', 'G♯', 'A♯', 'B♯', 'C♯♯'],
+        'locrian': ['D♯', 'E', 'F♯', 'G♯', 'A', 'B', 'C♯']
     },
     'E': {
         'major': ['E', 'F♯', 'G♯', 'A', 'B', 'C♯', 'D♯'],
@@ -159,6 +181,17 @@ const scaleSpellings = {
         'melodic-minor': ['G♭', 'A♭', 'B𝄫', 'C♭', 'D♭', 'E♭', 'F'],
         'locrian': ['G♭', 'A𝄫', 'B𝄫', 'C♭', 'D𝄫', 'E𝄫', 'F♭']
     },
+    'F#': {
+        'major': ['F♯', 'G♯', 'A♯', 'B', 'C♯', 'D♯', 'E♯'],
+        'dorian': ['F♯', 'G♯', 'A', 'B', 'C♯', 'D♯', 'E'],
+        'phrygian': ['F♯', 'G', 'A', 'B', 'C♯', 'D', 'E'],
+        'lydian': ['F♯', 'G♯', 'A♯', 'B♯', 'C♯', 'D♯', 'E♯'],
+        'mixolydian': ['F♯', 'G♯', 'A♯', 'B', 'C♯', 'D♯', 'E'],
+        'natural-minor': ['F♯', 'G♯', 'A', 'B', 'C♯', 'D', 'E'],
+        'harmonic-minor': ['F♯', 'G♯', 'A', 'B', 'C♯', 'D', 'E♯'],
+        'melodic-minor': ['F♯', 'G♯', 'A', 'B', 'C♯', 'D♯', 'E♯'],
+        'locrian': ['F♯', 'G', 'A', 'B', 'C', 'D', 'E']
+    },
     'G': {
         'major': ['G', 'A', 'B', 'C', 'D', 'E', 'F♯'],
         'dorian': ['G', 'A', 'B♭', 'C', 'D', 'E', 'F'],
@@ -180,6 +213,17 @@ const scaleSpellings = {
         'harmonic-minor': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G'],
         'melodic-minor': ['A♭', 'B♭', 'C♭', 'D♭', 'E♭', 'F', 'G'],
         'locrian': ['A♭', 'B𝄫', 'C♭', 'D♭', 'E𝄫', 'F♭', 'G♭']
+    },
+    'G#': {
+        'major': ['G♯', 'A♯', 'B♯', 'C♯', 'D♯', 'E♯', 'F♯♯'],
+        'dorian': ['G♯', 'A♯', 'B', 'C♯', 'D♯', 'E♯', 'F♯'],
+        'phrygian': ['G♯', 'A', 'B', 'C♯', 'D♯', 'E', 'F♯'],
+        'lydian': ['G♯', 'A♯', 'B♯', 'C♯♯', 'D♯', 'E♯', 'F♯♯'],
+        'mixolydian': ['G♯', 'A♯', 'B♯', 'C♯', 'D♯', 'E♯', 'F♯'],
+        'natural-minor': ['G♯', 'A♯', 'B', 'C♯', 'D♯', 'E', 'F♯'],
+        'harmonic-minor': ['G♯', 'A♯', 'B', 'C♯', 'D♯', 'E', 'F♯♯'],
+        'melodic-minor': ['G♯', 'A♯', 'B', 'C♯', 'D♯', 'E♯', 'F♯♯'],
+        'locrian': ['G♯', 'A', 'B', 'C♯', 'D', 'E', 'F♯']
     },
     'A': {
         'major': ['A', 'B', 'C♯', 'D', 'E', 'F♯', 'G♯'],
@@ -203,6 +247,17 @@ const scaleSpellings = {
         'melodic-minor': ['B♭', 'C', 'D♭', 'E♭', 'F', 'G', 'A'],
         'locrian': ['B♭', 'C♭', 'D♭', 'E♭', 'F♭', 'G♭', 'A♭']
     },
+    'A#': {
+        'major': ['A♯', 'B♯', 'C♯♯', 'D♯', 'E♯', 'F♯♯', 'G♯♯'],
+        'dorian': ['A♯', 'B♯', 'C♯', 'D♯', 'E♯', 'F♯♯', 'G♯'],
+        'phrygian': ['A♯', 'B', 'C♯', 'D♯', 'E♯', 'F♯', 'G♯'],
+        'lydian': ['A♯', 'B♯', 'C♯♯', 'D♯♯', 'E♯', 'F♯♯', 'G♯♯'],
+        'mixolydian': ['A♯', 'B♯', 'C♯♯', 'D♯', 'E♯', 'F♯♯', 'G♯'],
+        'natural-minor': ['A♯', 'B♯', 'C♯', 'D♯', 'E♯', 'F♯', 'G♯'],
+        'harmonic-minor': ['A♯', 'B♯', 'C♯', 'D♯', 'E♯', 'F♯', 'G♯♯'],
+        'melodic-minor': ['A♯', 'B♯', 'C♯', 'D♯', 'E♯', 'F♯♯', 'G♯♯'],
+        'locrian': ['A♯', 'B', 'C♯', 'D♯', 'E', 'F♯', 'G♯']
+    },
     'B': {
         'major': ['B', 'C♯', 'D♯', 'E', 'F♯', 'G♯', 'A♯'],
         'dorian': ['B', 'C♯', 'D', 'E', 'F♯', 'G♯', 'A'],
@@ -219,6 +274,74 @@ const scaleSpellings = {
 // Define colors for sharp and flat notes
 const DARK_RED = '#990000';
 const DARK_BLUE = '#000099';
+
+// --- NEW FUNCTION ---
+// Get the enharmonically correct key name based on the selected scale
+function getEffectiveKeyName(keyIndex, scaleName) {
+    const baseKeyName = keyNames[keyIndex];
+
+    // Logic for Db/C# at index 1
+    if (keyIndex === 1) {
+        switch (scaleName) {
+            case 'major':
+            case 'lydian':
+            case 'mixolydian':
+                return 'Db';
+            default: // minor scales, dorian, phrygian, locrian
+                return 'C#';
+        }
+    }
+
+    // Logic for Eb/D# at index 3
+    if (keyIndex === 3) {
+        switch (scaleName) {
+            case 'phrygian':
+            case 'locrian':
+                return 'D#';
+            default: // All other scales
+                return 'Eb';
+        }
+    }
+    
+    // Logic for Gb/F# at index 6
+    if (keyIndex === 6) {
+        switch (scaleName) {
+            case 'major':
+            case 'lydian':
+                return 'Gb';
+            default: // All other scales
+                return 'F#';
+        }
+    }
+
+    // Logic for Ab/G# at index 8
+    if (keyIndex === 8) {
+        switch (scaleName) {
+            case 'natural-minor':
+            case 'harmonic-minor':
+            case 'melodic-minor':
+            case 'phrygian':
+            case 'locrian':
+                return 'G#';
+            default: // Major, dorian, lydian, mixolydian
+                return 'Ab';
+        }
+    }
+    
+    // Logic for Bb/A# at index 10
+    if (keyIndex === 10) {
+        switch (scaleName) {
+            case 'locrian':
+                return 'A#';
+            default: // All other scales
+                return 'Bb';
+        }
+    }
+
+    // Return the default key name for all other keys
+    return baseKeyName;
+}
+
 
 // Generate letter names for a specific key and scale using the new lookup table
 function generateLetterNamesForScale(keyName, scaleName) {
@@ -317,15 +440,45 @@ let letterNamesByKey = {};
 
 // Function to update mappings when key or scale changes
 function updateScaleMappings() {
-  const currentKey = keyNames[currentKeyIndex];
-  
   // Generate new mappings for all keys with current scale
   noteColorsByKey = {};
   letterNamesByKey = {};
   
-  keyNames.forEach(key => {
-    letterNamesByKey[key] = generateLetterNamesForScale(key, currentScale);
-    noteColorsByKey[key] = generateColorsForScale(key, currentScale);
+  keyNames.forEach((key, index) => {
+    // For the Db/C# key
+    if (index === 1) {
+        letterNamesByKey['Db'] = generateLetterNamesForScale('Db', currentScale);
+        noteColorsByKey['Db'] = generateColorsForScale('Db', currentScale);
+        letterNamesByKey['C#'] = generateLetterNamesForScale('C#', currentScale);
+        noteColorsByKey['C#'] = generateColorsForScale('C#', currentScale);
+    // For the Eb/D# key
+    } else if (index === 3) {
+        letterNamesByKey['Eb'] = generateLetterNamesForScale('Eb', currentScale);
+        noteColorsByKey['Eb'] = generateColorsForScale('Eb', currentScale);
+        letterNamesByKey['D#'] = generateLetterNamesForScale('D#', currentScale);
+        noteColorsByKey['D#'] = generateColorsForScale('D#', currentScale);
+    // For the Gb/F# key
+    } else if (index === 6) {
+        letterNamesByKey['Gb'] = generateLetterNamesForScale('Gb', currentScale);
+        noteColorsByKey['Gb'] = generateColorsForScale('Gb', currentScale);
+        letterNamesByKey['F#'] = generateLetterNamesForScale('F#', currentScale);
+        noteColorsByKey['F#'] = generateColorsForScale('F#', currentScale);
+    // For the Ab/G# key
+    } else if (index === 8) {
+        letterNamesByKey['Ab'] = generateLetterNamesForScale('Ab', currentScale);
+        noteColorsByKey['Ab'] = generateColorsForScale('Ab', currentScale);
+        letterNamesByKey['G#'] = generateLetterNamesForScale('G#', currentScale);
+        noteColorsByKey['G#'] = generateColorsForScale('G#', currentScale);
+    // For the Bb/A# key
+    } else if (index === 10) {
+        letterNamesByKey['Bb'] = generateLetterNamesForScale('Bb', currentScale);
+        noteColorsByKey['Bb'] = generateColorsForScale('Bb', currentScale);
+        letterNamesByKey['A#'] = generateLetterNamesForScale('A#', currentScale);
+        noteColorsByKey['A#'] = generateColorsForScale('A#', currentScale);
+    } else {
+        letterNamesByKey[key] = generateLetterNamesForScale(key, currentScale);
+        noteColorsByKey[key] = generateColorsForScale(key, currentScale);
+    }
   });
 
   // Also update the frequencies whenever the scale or key changes
@@ -695,7 +848,7 @@ function setupTouchHandlers() {
 }
 
 function updateBoxNames() {
-  const currentKey = keyNames[currentKeyIndex];
+  const currentKey = getEffectiveKeyName(currentKeyIndex, currentScale);
 
   for (const btn of buttons) {
     const div = noteButtonRefs[btn.keys[0]];
@@ -802,7 +955,7 @@ function darkenColor(hex, percent) {
 }
 
 function updateControlsBarColor() {
-    const keyName = keyNames[currentKeyIndex];
+    const keyName = getEffectiveKeyName(currentKeyIndex, currentScale);
     const baseNote = keyName.charAt(0);
     const color = KEY_COLORS[baseNote] || '#001f3f';
     const borderColor = darkenColor(color, 30);
@@ -815,7 +968,7 @@ function updateControlsBarColor() {
 function setupControlEvents() {
   document.getElementById("key-left").onclick = () => {
     currentKeyIndex = (currentKeyIndex - 1 + keyNames.length) % keyNames.length;
-    document.getElementById("key-name").textContent = keyNames[currentKeyIndex];
+    document.getElementById("key-name").textContent = getEffectiveKeyName(currentKeyIndex, currentScale);
     updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
@@ -824,7 +977,7 @@ function setupControlEvents() {
   
   document.getElementById("key-right").onclick = () => {
     currentKeyIndex = (currentKeyIndex + 1) % keyNames.length;
-    document.getElementById("key-name").textContent = keyNames[currentKeyIndex];
+    document.getElementById("key-name").textContent = getEffectiveKeyName(currentKeyIndex, currentScale);
     updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
@@ -837,6 +990,10 @@ function setupControlEvents() {
     const selectedScaleKey = e.target.value;
     const scaleKey = Object.keys(scaleDefinitions).find(key => key === selectedScaleKey) || 'major';
     currentScale = scaleKey;
+    
+    // Update the key name display in case it's an enharmonic key
+    document.getElementById("key-name").textContent = getEffectiveKeyName(currentKeyIndex, currentScale);
+
     updateScaleMappings();
     updateSolfegeColors();
     updateBoxNames();
@@ -893,7 +1050,7 @@ function renderButtons() {
     div.style.outline = 'none';
     div.setAttribute('data-keys', btn.keys.join(','));
     
-    const currentKey = keyNames[currentKeyIndex];
+    const currentKey = getEffectiveKeyName(currentKeyIndex, currentScale);
     const color = (noteColorsByKey[currentKey] && noteColorsByKey[currentKey][currentSolfege]) || '#ccc';
     div.style.backgroundColor = color;
     
@@ -1103,7 +1260,7 @@ function handleTouchEnd(e) {
 }
 
 function updateSolfegeColors() {
-  const currentKey = keyNames[currentKeyIndex];
+  const currentKey = getEffectiveKeyName(currentKeyIndex, currentScale);
   const bgColors = noteColorsByKey[currentKey];
   
   buttons.forEach(btn => {
@@ -1129,7 +1286,7 @@ function updateSolfegeColors() {
 }
 
 function updateSimulatedKeyboardColors() {
-    const currentKey = keyNames[currentKeyIndex];
+    const currentKey = getEffectiveKeyName(currentKeyIndex, currentScale);
     const letterNames = letterNamesByKey[currentKey];
     if (!letterNames) return;
 
@@ -1300,3 +1457,5 @@ function initialize() {
 
 // Start the application
 initialize();
+
+

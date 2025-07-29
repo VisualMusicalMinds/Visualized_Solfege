@@ -102,7 +102,7 @@ html, body, #app-wrapper, .main-content {
   display: flex; 
   align-items: center; 
   justify-content: center;
-  font-size: clamp(0.9rem, min(2.5vw, 2.5vh, 1.8em), 1.8em);
+  font-size: clamp(1.1rem, min(3vw, 3vh, 2em), 2em);
   padding: 0.3em 1em;
   background: #fff;
   color: #333;
@@ -153,7 +153,7 @@ select.scale-dropdown {
   cursor: pointer;
   padding: 0.2em 0.5em;
   user-select: none;
-  font-size: inherit;
+  font-size: 1.2em;
   font-family: inherit;
 }
 

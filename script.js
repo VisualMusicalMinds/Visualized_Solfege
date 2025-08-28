@@ -685,7 +685,7 @@ function stopNote(key, isVoiceStealing = false) {
   const { gain, osc, lfo } = active;
   
   // --- Release Envelope (from spec) ---
-  const release = 0.15; // A safe, pleasant release time.
+  const release = 0.3; // A safe, pleasant release time, slightly longer as requested.
   const stopBuffer = 0.01; // A tiny delay to ensure the ramp to 0 completes before stopping.
 
   gain.gain.cancelScheduledValues(now);

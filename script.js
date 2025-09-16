@@ -517,6 +517,7 @@ function updateScaleMappings() {
 
 // UI state
 let cButtonState = 'note'; // can be 'note' or 'S'
+let octaveButtonActive = false;
 
 // Map to identify if a note is flat or sharp
 const noteAccidentalMap = {
@@ -827,13 +828,33 @@ function renderToggleButton() {
       updateBoxNames();
     }
   });
-  cellRefs['5d'].innerHTML = '';
-  cellRefs['5d'].appendChild(el);
+  cellRefs['6d'].innerHTML = '';
+  cellRefs['6d'].appendChild(el);
+}
+
+function renderOctaveButton() {
+  const btn = document.createElement('button');
+  btn.className = 'octave-btn';
+  btn.innerHTML = '8<sup>va</sup>';
+
+  if (octaveButtonActive) {
+    btn.classList.add('active');
+  }
+
+  btn.addEventListener('click', () => {
+    octaveButtonActive = !octaveButtonActive;
+    renderOctaveButton(); // Re-render to update style
+  });
+
+  const targetCell = cellRefs['5d'];
+  targetCell.innerHTML = '';
+  targetCell.appendChild(btn);
 }
 
 function setupAccidentalButtons() {
-  cellRefs['5d'].style.border = "2px solid #ddd";
+  cellRefs['6d'].style.border = "2px solid #ddd";
   renderToggleButton();
+  renderOctaveButton();
 
   cellRefs['7d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppSharpSign3.png" alt="Sharp">';
   cellRefs['8d'].innerHTML = '<img class="solfege-img" src="https://raw.githubusercontent.com/VisualMusicalMinds/Musical-Images/refs/heads/main/MusicAppFlatSign3.png" alt="Flat">';

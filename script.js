@@ -833,9 +833,10 @@ function renderToggleButton() {
 }
 
 function renderOctaveButton() {
-  const btn = document.createElement('button');
+  const btn = document.createElement('div');
+  btn.id = 'octave-btn';
   btn.className = 'octave-btn';
-  btn.innerHTML = '8<sup>va</sup>';
+  btn.innerHTML = '8<sup class="octave-sup">va</sup>';
 
   if (octaveButtonActive) {
     btn.classList.add('active');
@@ -843,7 +844,7 @@ function renderOctaveButton() {
 
   btn.addEventListener('click', () => {
     octaveButtonActive = !octaveButtonActive;
-    renderOctaveButton(); // Re-render to update style
+    btn.classList.toggle('active');
   });
 
   const targetCell = cellRefs['5d'];

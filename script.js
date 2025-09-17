@@ -835,6 +835,31 @@ function renderToggleButton() {
 }
 
 let octaveButtonActive = false;
+let manualOctaveClick = false;
+
+function updateOctaveState(e) {
+    const capsLockOn = e.getModifierState("CapsLock");
+    const shiftOn = e.shiftKey;
+
+    const keyboardActive = capsLockOn || shiftOn;
+
+    let finalState;
+    if (keyboardActive) {
+        finalState = true;
+        manualOctaveClick = false; // Reset manual override if keyboard is used
+    } else {
+        finalState = manualOctaveClick;
+    }
+    
+    if (octaveButtonActive !== finalState) {
+        octaveButtonActive = finalState;
+        const btn = document.getElementById('octave-btn');
+        if (btn) {
+            btn.classList.toggle('active', octaveButtonActive);
+        }
+    }
+}
+
 function renderOctaveButton() {
   const btn = document.createElement('div');
   btn.id = 'octave-btn';
@@ -845,9 +870,16 @@ function renderOctaveButton() {
     btn.classList.add('active');
   }
 
-  btn.addEventListener('click', () => {
-    octaveButtonActive = !octaveButtonActive;
-    btn.classList.toggle('active');
+  btn.addEventListener('click', (e) => {
+    if (e.shiftKey) {
+        return;
+    }
+    manualOctaveClick = !manualOctaveClick;
+    
+    // Immediately update visuals based on the manual toggle.
+    // This will be corrected by the next keyboard event if CapsLock is on.
+    octaveButtonActive = manualOctaveClick;
+    btn.classList.toggle('active', octaveButtonActive);
   });
 
   const targetCell = cellRefs['5d'];
@@ -1188,6 +1220,7 @@ function setupGlobalEventHandlers() {
   });
 
   window.addEventListener('keydown', (e) => {
+    updateOctaveState(e);
     if (e.repeat) return;
     let accidentalChanged = false;
 
@@ -1233,10 +1266,11 @@ function setupGlobalEventHandlers() {
       return;
     }
 
-    if (!heldKeys.has(e.key) && buttons.some(b => b.keys.includes(e.key))) {
-      heldKeys.add(e.key);
-      handlePlayKey(e.key);
-      if (keyToDiv[e.key]) keyToDiv[e.key].classList.add('active');
+    const key = e.key.toLowerCase();
+    if (!heldKeys.has(key) && buttons.some(b => b.keys.includes(key))) {
+      heldKeys.add(key);
+      handlePlayKey(key);
+      if (keyToDiv[key]) keyToDiv[key].classList.add('active');
     }
     
     if (accidentalChanged) {
@@ -1245,6 +1279,7 @@ function setupGlobalEventHandlers() {
   });
 
   window.addEventListener('keyup', (e) => {
+    updateOctaveState(e);
     let accidentalChanged = false;
 
     if (modal.style.display === 'block') {
@@ -1265,10 +1300,11 @@ function setupGlobalEventHandlers() {
       cellRefs['8d'].classList.remove('active');
     }
     
-    if (heldKeys.has(e.key)) {
-      heldKeys.delete(e.key);
-      handleStopKey(e.key);
-      if (keyToDiv[e.key]) keyToDiv[e.key].classList.remove('active');
+    const key = e.key.toLowerCase();
+    if (heldKeys.has(key)) {
+      heldKeys.delete(key);
+      handleStopKey(key);
+      if (keyToDiv[key]) keyToDiv[key].classList.remove('active');
     }
     
     if (accidentalChanged) {

@@ -722,7 +722,10 @@ function handlePlayKey(key) {
       return;
   }
   
-  const freq = noteFrequencies[btn.note] * Math.pow(2, accidental / 12);
+  let freq = noteFrequencies[btn.note] * Math.pow(2, accidental / 12);
+  if (octaveButtonActive) {
+    freq *= 2;
+  }
   startNote(oscKey, freq);
 }
 
@@ -1518,5 +1521,3 @@ function initialize() {
 
 // Start the application
 initialize();
-
-

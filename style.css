@@ -322,11 +322,12 @@ select.scale-dropdown {
   height: 100%;
   border: 1px solid #ccc;
   background-color: white;
+  color: black;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: sans-serif;
+  font-family: 'EB Garamond', Garamond, 'Times New Roman', Times, serif;
 }
 
 .octave-btn.active {

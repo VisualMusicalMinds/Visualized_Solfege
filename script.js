@@ -1252,12 +1252,14 @@ function setupGlobalEventHandlers() {
       }
     }
     
-    if (e.key === '=') {
+    const mappedKey = getMappedKey(e);
+
+    if (mappedKey === '=') {
       accidentalHeld.sharp = true; 
       accidentalChanged = true;
       cellRefs['7d'].classList.add('active');
     }
-    if (e.key === '-') {
+    if (mappedKey === '-') {
       accidentalHeld.flat = true; 
       accidentalChanged = true;
       cellRefs['8d'].classList.add('active');
@@ -1287,11 +1289,10 @@ function setupGlobalEventHandlers() {
       return;
     }
 
-    const key = getMappedKey(e);
-    if (!heldKeys.has(key) && buttons.some(b => b.keys.includes(key))) {
-      heldKeys.add(key);
-      handlePlayKey(key);
-      if (keyToDiv[key]) keyToDiv[key].classList.add('active');
+    if (!heldKeys.has(mappedKey) && buttons.some(b => b.keys.includes(mappedKey))) {
+      heldKeys.add(mappedKey);
+      handlePlayKey(mappedKey);
+      if (keyToDiv[mappedKey]) keyToDiv[mappedKey].classList.add('active');
     }
     
     if (accidentalChanged) {
@@ -1310,22 +1311,23 @@ function setupGlobalEventHandlers() {
       }
     }
     
-    if (e.key === '=') {
+    const mappedKey = getMappedKey(e);
+
+    if (mappedKey === '=') {
       accidentalHeld.sharp = false; 
       accidentalChanged = true;
       cellRefs['7d'].classList.remove('active');
     }
-    if (e.key === '-') {
+    if (mappedKey === '-') {
       accidentalHeld.flat = false; 
       accidentalChanged = true;
       cellRefs['8d'].classList.remove('active');
     }
     
-    const key = getMappedKey(e);
-    if (heldKeys.has(key)) {
-      heldKeys.delete(key);
-      handleStopKey(key);
-      if (keyToDiv[key]) keyToDiv[key].classList.remove('active');
+    if (heldKeys.has(mappedKey)) {
+      heldKeys.delete(mappedKey);
+      handleStopKey(mappedKey);
+      if (keyToDiv[mappedKey]) keyToDiv[mappedKey].classList.remove('active');
     }
     
     if (accidentalChanged) {

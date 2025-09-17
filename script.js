@@ -534,6 +534,27 @@ const noteAccidentalMap = {
   'C♯♯': 'double-sharp', 'D♯♯': 'double-sharp', 'E♯♯': 'double-sharp', 'F♯♯': 'double-sharp', 'G♯♯': 'double-sharp', 'A♯♯': 'double-sharp', 'B♯♯': 'double-sharp',
 };
 
+// Maps shifted key values to their base, unshifted counterparts.
+// This is necessary because e.key changes for symbols when Shift is held.
+const keyMap = {
+  '!': '1', '@': '2', '#': '3', '$': '4', '%': '5', '^': '6', '&': '7', '*': '8', '(': '9', ')': '0',
+  ':': ';', '<': ',', '>': '.', '?': '/',
+  '_': '-', '+': '=', '{': '[', '}': ']', '|': '\\', '"': "'"
+};
+
+// Returns the base key from a keyboard event, accounting for Shift modifications.
+function getMappedKey(e) {
+  let key = e.key;
+  // For shifted keys that produce different characters (e.g., '!' from '1'),
+  // map them back to the base key using the keyMap.
+  if (e.shiftKey && keyMap[key]) {
+    return keyMap[key];
+  }
+  // For letters, toLowerCase() correctly handles the shift key (e.g., 'A' -> 'a').
+  // For unshifted symbols and numbers, it returns the key as is.
+  return key.toLowerCase();
+}
+
 // Keyboard mappings (expanded to include new solfege syllables)
 const buttonSolfegeNames = {
   'f': 'Fa', 'q': 'So', 'd': 'Mi', 's': 'Re', 'a': 'Do', 'x': 'La', 'c': 'Ti',
@@ -1266,7 +1287,7 @@ function setupGlobalEventHandlers() {
       return;
     }
 
-    const key = e.key.toLowerCase();
+    const key = getMappedKey(e);
     if (!heldKeys.has(key) && buttons.some(b => b.keys.includes(key))) {
       heldKeys.add(key);
       handlePlayKey(key);
@@ -1300,7 +1321,7 @@ function setupGlobalEventHandlers() {
       cellRefs['8d'].classList.remove('active');
     }
     
-    const key = e.key.toLowerCase();
+    const key = getMappedKey(e);
     if (heldKeys.has(key)) {
       heldKeys.delete(key);
       handleStopKey(key);

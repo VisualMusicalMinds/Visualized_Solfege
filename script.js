@@ -517,7 +517,6 @@ function updateScaleMappings() {
 
 // UI state
 let cButtonState = 'note'; // can be 'note' or 'S'
-let octaveButtonActive = false;
 
 // Map to identify if a note is flat or sharp
 const noteAccidentalMap = {
@@ -832,6 +831,7 @@ function renderToggleButton() {
   cellRefs['6d'].appendChild(el);
 }
 
+let octaveButtonActive = false;
 function renderOctaveButton() {
   const btn = document.createElement('div');
   btn.id = 'octave-btn';

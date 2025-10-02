@@ -377,3 +377,69 @@ select.scale-dropdown {
     border-radius: 3px;
   }
 }
+
+/* Menu toggle button - stationary at top */
+.menu-toggle-btn {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  padding: 4px 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  outline: none;
+}
+
+.menu-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 1);
+  transform: translateX(-50%) scale(1.05);
+}
+
+.menu-toggle-btn:focus {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.arrow-icon {
+  display: inline-block;
+  font-size: 16px;
+  color: #333;
+  transition: transform 0.3s ease;
+}
+
+/* When menu is hidden, rotate arrow to point down */
+.menu-hidden .menu-toggle-btn .arrow-icon {
+  transform: rotate(180deg);
+}
+
+/* Hide the controls bar when menu is collapsed */
+.menu-hidden .controls-bar {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  margin-bottom: 0;
+}
+
+/* Adjust main content when menu is hidden */
+.menu-hidden .main-content {
+  margin-top: 0;
+}
+
+/* Smooth transitions */
+.controls-bar {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.main-content {
+  transition: margin-top 0.3s ease;
+}
+
+/* Make grid larger when menu is hidden */
+.menu-hidden .proportional-grid-wrapper {
+  /* Grid will automatically fill the extra space */
+}

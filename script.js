@@ -1537,6 +1537,38 @@ function resizeGrid() {
   if (toggleBtn) toggleBtn.style.fontSize = Math.max(fontSize * 1.1, 20) + 'px';
 }
 
+// Add this new function before the initialize() function
+function setupMenuToggle() {
+  const toggleBtn = document.getElementById('menu-toggle');
+  const body = document.body;
+  let menuVisible = true;
+
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', () => {
+    menuVisible = !menuVisible;
+    
+    if (menuVisible) {
+      body.classList.remove('menu-hidden');
+    } else {
+      body.classList.add('menu-hidden');
+    }
+    
+    // Trigger grid resize after transition completes
+    setTimeout(() => {
+      resizeGrid();
+    }, 350); // Wait for CSS transition (300ms) plus small buffer
+  });
+
+  // Keyboard support for accessibility
+  toggleBtn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleBtn.click();
+    }
+  });
+}
+
 // --- INITIALIZATION ---
 function initialize() {
   initializeGrid();
@@ -1547,6 +1579,7 @@ function initialize() {
   renderButtons();
   setupGlobalEventHandlers();
   setupSimulatedKeyboardEvents();
+  setupMenuToggle(); // Add this line
   
   window.addEventListener('resize', resizeGrid);
   window.addEventListener('DOMContentLoaded', () => { 
